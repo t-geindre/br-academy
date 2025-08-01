@@ -3,8 +3,8 @@ package grid
 import "github.com/hajimehoshi/ebiten/v2"
 
 type Shape struct {
-	S       [4 * 4]uint8
-	L, R, B int // empty space, Left, Right, Bottom
+	S          [4 * 4]uint8
+	L, R, T, B int // empty space, Left, Right, Bottom
 }
 type Shapes [4]Shape
 
@@ -255,19 +255,21 @@ func colorOpts(r, g, b, a float32) *ebiten.DrawImageOptions {
 func toShape(rows ...string) Shape {
 	var s Shape
 	minX, maxX := 4, -1
-	maxY := -1
+	minY, maxY := 4, -1
 
 	for y, row := range rows {
 		for x, c := range row {
 			if c == 'X' {
 				s.S[y*4+x] = 1
 
-				// Mises à jour des bornes utiles
 				if x < minX {
 					minX = x
 				}
 				if x > maxX {
 					maxX = x
+				}
+				if y < minY {
+					minY = y
 				}
 				if y > maxY {
 					maxY = y
@@ -276,13 +278,14 @@ func toShape(rows ...string) Shape {
 		}
 	}
 
-	if maxX >= minX {
+	if maxX >= minX && maxY >= minY {
 		s.L = minX
 		s.R = 3 - maxX
+		s.T = minY
 		s.B = 3 - maxY
 	} else {
-		// Forme vide (juste au cas où)
-		s.L, s.R, s.B = 4, 4, 4
+		//Empty shape
+		s.L, s.R, s.T, s.B = 4, 4, 4, 4
 	}
 
 	return s

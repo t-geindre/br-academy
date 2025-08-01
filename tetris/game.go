@@ -75,10 +75,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// Running
 	screen.DrawImage(g.Background, nil)
 	g.GridView.Draw(screen)
+	g.GridView.DrawCenteredTetriminoAt(screen, g.Grid.Next, 880.0, 200.0)
 
 	ui.PanelPrintf(
 		screen, ui.BottomRight,
-		"[F1] Reset\nLevel: %d\nScore: %d\nLines: %d", g.Grid.Level, g.Grid.Score, g.Grid.Lines,
+		"[F1] Reset\nLevel: %d\nScore: %d\nLines: %d",
+		g.Grid.Stats.Level, g.Grid.Stats.Score, g.Grid.Stats.Lines,
 	)
 
 	ui.DrawFTPS(screen)
@@ -109,7 +111,7 @@ func (g *Game) Init() {
 	bds := g.Background.Bounds()
 	g.Width, g.Height = bds.Dx(), bds.Dy()
 
-	ebiten.SetWindowSize(g.Width/5, g.Height/5)
+	ebiten.SetWindowSize(g.Width, g.Height)
 
 	g.State = StateLoaded
 }

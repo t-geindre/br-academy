@@ -13,11 +13,8 @@ type Grid struct {
 	Tetriminos   [7]Tetrimino
 	Bag7         []Tetrimino
 
-	Level int
-	Score int
-	Lines int
-
 	Ticks int
+	Stats *Stats
 }
 
 func NewGrid(w, h int) *Grid {
@@ -25,6 +22,7 @@ func NewGrid(w, h int) *Grid {
 		W:          w,
 		H:          h,
 		Tetriminos: GetTetriminos(),
+		Stats:      NewStats(),
 	}
 
 	g.Reset()
@@ -39,90 +37,28 @@ func (g *Grid) Update() {
 
 	if g.Ticks == 0 {
 		g.Fall()
-		g.ClearLines()
-		if g.Level == 0 {
-			g.Ticks = int(48.0 / 60.0 * float64(ebiten.TPS()))
-			return
-		}
-		if g.Level == 1 {
-			g.Ticks = int(43.0 / 60.0 * float64(ebiten.TPS()))
-			return
-		}
-		if g.Level < 10 {
-			g.Ticks = int(28.0 / 60.0 * float64(ebiten.TPS()))
-			return
-		}
-		if g.Level < 20 {
-			g.Ticks = int(18.0 / 60.0 * float64(ebiten.TPS()))
-			return
-		}
-		if g.Level < 30 {
-			g.Ticks = int(8.0 / 60.0 * float64(ebiten.TPS()))
-			return
-		}
-		g.Ticks = int(1.0 / 60.0 * float64(ebiten.TPS()))
+		g.Ticks = g.Stats.GetTickRate()
+		return
 	}
 
 	g.Ticks--
-	/*
-		Cool effect when losing a game
-		for i := range g.Bricks {
-			g.Bricks[i] = g.Tetriminos[rand.Intn(len(g.Tetriminos))].Color
-		}
-	*/
 }
 
-// CONTROLS
+func (g *Grid) Reset() {
+	g.Active = nil
+	g.Next = nil
 
-func (g *Grid) MoveLeft() {
-	if !g.CollidesAt(g.Active.X-1, g.Active.Y, g.Active.RotIdx) && g.ResetFixDelay() {
-		g.Active.X--
-	}
-}
+	g.Bag7 = make([]Tetrimino, 0, 7)
+	g.Bricks = make([]*ebiten.DrawImageOptions, g.W*g.H)
+	g.SpawnTetrimino()
 
-func (g *Grid) MoveRight() {
-	if !g.CollidesAt(g.Active.X+1, g.Active.Y, g.Active.RotIdx) && g.ResetFixDelay() {
-		g.Active.X++
-
-	}
-}
-
-func (g *Grid) MoveDown() {
-	g.Fall()
-}
-
-func (g *Grid) Rotate() {
-	newRot := (g.Active.RotIdx + 1) % len(g.Active.Shape.Shapes)
-
-	// Wall kicks
-	kicks := [][2]int{
-		{0, 0},
-		{-1, 0},
-		{1, 0},
-		{0, -1},
-		{-2, 0},
-		{2, 0},
-	}
-
-	for _, k := range kicks {
-		dx, dy := k[0], k[1]
-		newX := g.Active.X + dx
-		newY := g.Active.Y + dy
-
-		if !g.CollidesAt(newX, newY, newRot) && g.ResetFixDelay() {
-			g.Active.X = newX
-			g.Active.Y = newY
-			g.Active.RotIdx = newRot
-			return
-		}
-	}
-
-	// Rotation canceled
+	g.Stats.Reset()
+	g.Ticks = g.Stats.GetTickRate()
 }
 
 // TETRIMINO LOGIC
 
-func (g *Grid) GetNextTetrimino() Tetrimino {
+func (g *Grid) GetNextTetrimino() *FallingTetrimino {
 	if len(g.Bag7) == 0 {
 		g.Bag7 = append(g.Bag7, g.Tetriminos[:]...)
 		rand.Shuffle(len(g.Bag7), func(i, j int) {
@@ -133,22 +69,21 @@ func (g *Grid) GetNextTetrimino() Tetrimino {
 	t := g.Bag7[0]
 	g.Bag7 = g.Bag7[1:]
 
-	return t
+	return &FallingTetrimino{
+		Shape:  t,
+		RotIdx: 0,
+		X:      g.W/2 - 2,
+		Y:      -t.Shapes[0].B, // Start above the grid
+	}
 }
 
 func (g *Grid) SpawnTetrimino() {
 	if g.Next == nil {
-		s := g.GetNextTetrimino()
-		g.Next = &FallingTetrimino{
-			Shape:  s,
-			RotIdx: 0,
-			X:      g.W/2 - 2,
-			Y:      -s.Shapes[0].B, // Start above the grid
-		}
+		g.Next = g.GetNextTetrimino()
 	}
 
 	g.Active = g.Next
-	g.Next = nil
+	g.Next = g.GetNextTetrimino()
 }
 
 func (g *Grid) FixTetrimino() {
@@ -182,6 +117,7 @@ func (g *Grid) FixTetrimino() {
 		}
 	}
 
+	g.ClearLines()
 	g.SpawnTetrimino()
 }
 
@@ -288,23 +224,53 @@ func (g *Grid) ClearLines() {
 		}
 	}
 
-	if linesCleared == 0 {
-		return
-	}
-
-	g.Score += []int{0, 100, 300, 500, 800}[linesCleared] * (g.Level + 1)
-	g.Lines += linesCleared
-	g.Level = g.Lines / 10
+	g.Stats.AddLines(linesCleared)
 }
 
-func (g *Grid) Reset() {
-	g.Bricks = make([]*ebiten.DrawImageOptions, g.W*g.H)
-	g.Active = nil
-	g.Next = nil
-	g.Bag7 = make([]Tetrimino, 0, 7)
-	g.SpawnTetrimino()
-	g.Level = 0
-	g.Score = 0
-	g.Lines = 0
-	g.Ticks = 0
+// CONTROLS
+
+func (g *Grid) MoveLeft() {
+	if !g.CollidesAt(g.Active.X-1, g.Active.Y, g.Active.RotIdx) && g.ResetFixDelay() {
+		g.Active.X--
+	}
+}
+
+func (g *Grid) MoveRight() {
+	if !g.CollidesAt(g.Active.X+1, g.Active.Y, g.Active.RotIdx) && g.ResetFixDelay() {
+		g.Active.X++
+
+	}
+}
+
+func (g *Grid) MoveDown() {
+	g.Fall()
+}
+
+func (g *Grid) Rotate() {
+	newRot := (g.Active.RotIdx + 1) % len(g.Active.Shape.Shapes)
+
+	// Wall kicks
+	kicks := [][2]int{
+		{0, 0},
+		{-1, 0},
+		{1, 0},
+		{0, -1},
+		{-2, 0},
+		{2, 0},
+	}
+
+	for _, k := range kicks {
+		dx, dy := k[0], k[1]
+		newX := g.Active.X + dx
+		newY := g.Active.Y + dy
+
+		if !g.CollidesAt(newX, newY, newRot) && g.ResetFixDelay() {
+			g.Active.X = newX
+			g.Active.Y = newY
+			g.Active.RotIdx = newRot
+			return
+		}
+	}
+
+	// Rotation canceled
 }

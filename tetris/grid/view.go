@@ -2,27 +2,42 @@ package grid
 
 import "github.com/hajimehoshi/ebiten/v2"
 
+type Clearing struct {
+	Line     int
+	TicksEnd int
+	Ticks    int
+}
+
 type View struct {
 	Grid             *Grid
 	Brick            *ebiten.Image
 	BrickW, BrickH   int
 	OffsetX, OffsetY int
+	Clearings        []*Clearing
+	TempLine         *ebiten.Image
+	DisappearShd     *ebiten.Shader
 }
 
-func NewView(g *Grid, ox, oy int, b *ebiten.Image) *View {
+func NewView(g *Grid, ox, oy int, b *ebiten.Image, dsh *ebiten.Shader) *View {
 	bds := b.Bounds()
 	return &View{
-		Grid:    g,
-		Brick:   b,
-		BrickW:  bds.Dx(),
-		BrickH:  bds.Dy(),
-		OffsetX: ox,
-		OffsetY: oy,
+		Grid:         g,
+		Brick:        b,
+		BrickW:       bds.Dx(),
+		BrickH:       bds.Dy(),
+		OffsetX:      ox,
+		OffsetY:      oy,
+		TempLine:     ebiten.NewImage(g.W*bds.Dx(), bds.Dy()),
+		DisappearShd: dsh,
 	}
 }
 
 func (v *View) Draw(screen *ebiten.Image) {
 	for y := 0; y < v.Grid.H; y++ {
+		if v.isClearing(y) {
+			continue
+		}
+
 		for x := 0; x < v.Grid.W; x++ {
 			i := y*v.Grid.W + x
 			opts := v.Grid.Bricks[i]
@@ -31,6 +46,8 @@ func (v *View) Draw(screen *ebiten.Image) {
 			}
 		}
 	}
+
+	v.DrawClearings(screen)
 
 	if v.Grid.Active != nil {
 		v.DrawTetriminoAtGridPos(screen, v.Grid.Active, v.Grid.Active.X, v.Grid.Active.Y)
@@ -84,4 +101,55 @@ func (v *View) drawBrick(dest *ebiten.Image, x, y float64, opts *ebiten.DrawImag
 	opts.GeoM.Reset()
 	opts.GeoM.Translate(x, y)
 	dest.DrawImage(v.Brick, opts)
+}
+
+func (v *View) isClearing(y int) bool {
+	for _, c := range v.Clearings {
+		if c.Line == y {
+			c.Ticks++
+			if c.Ticks > c.TicksEnd {
+				v.Clearings = append(v.Clearings[:0], v.Clearings[1:]...)
+				return false
+			}
+			return true
+		}
+	}
+
+	if v.Grid.IsClearedLine(y) {
+		v.Clearings = append(v.Clearings, &Clearing{
+			Line:     y,
+			Ticks:    0,
+			TicksEnd: v.Grid.Stats.GetTickRate(),
+		})
+
+		return true
+	}
+
+	return false
+}
+
+func (v *View) DrawClearings(screen *ebiten.Image) {
+	for _, c := range v.Clearings {
+		for x := 0; x < v.Grid.W; x++ {
+			opts := v.Grid.Bricks[c.Line*v.Grid.W+x]
+			opts.GeoM.Reset()
+			opts.GeoM.Translate(float64(x*v.BrickW), 0)
+			v.TempLine.DrawImage(v.Brick, opts)
+		}
+
+		threshold := float32(c.Ticks)/float32(c.TicksEnd)*float32(v.Grid.W*v.BrickW) + float32(v.OffsetX)
+
+		opts := &ebiten.DrawRectShaderOptions{
+			Uniforms: map[string]interface{}{
+				"Threshold": threshold,
+				"OffsetX":   float32(v.OffsetX),
+				"OffsetY":   float32(v.OffsetY + c.Line*v.BrickH),
+			},
+			Images: [4]*ebiten.Image{
+				v.TempLine,
+			},
+		}
+		opts.GeoM.Translate(float64(v.OffsetX), float64(c.Line*v.BrickH+v.OffsetY))
+		screen.DrawRectShader(v.Grid.W*v.BrickW, v.BrickH, v.DisappearShd, opts)
+	}
 }

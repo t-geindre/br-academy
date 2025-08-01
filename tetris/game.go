@@ -4,6 +4,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"os"
 	"tetris/grid"
 	"ui"
 )
@@ -94,19 +95,33 @@ func (g *Game) Layout(x, y int) (int, int) {
 }
 
 func (g *Game) Init() {
-
+	// Load UI
 	bg, _, err := ebitenutil.NewImageFromFile("assets/ui.png")
 	if err != nil {
 		panic(err)
 	}
 	g.Background = bg
 
+	// Load brick
 	brick, _, err := ebitenutil.NewImageFromFile("assets/brick.png")
 	if err != nil {
 		panic(err)
 	}
 
-	g.GridView = grid.NewView(g.Grid, 64, 32, brick)
+	// Load disappearing shader
+	rawShd, err := os.ReadFile("assets/shaders/disappear.kage")
+	if err != nil {
+		panic(err)
+	}
+
+	// Compile shader
+	dShd, err := ebiten.NewShader(rawShd)
+	if err != nil {
+		panic(err)
+	}
+
+	// Loading done
+	g.GridView = grid.NewView(g.Grid, 64, 32, brick, dShd)
 
 	bds := g.Background.Bounds()
 	g.Width, g.Height = bds.Dx(), bds.Dy()

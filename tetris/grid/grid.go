@@ -15,6 +15,8 @@ type Grid struct {
 
 	Ticks int
 	Stats *Stats
+
+	ToClear []int
 }
 
 func NewGrid(w, h int) *Grid {
@@ -36,6 +38,8 @@ func (g *Grid) Update() {
 	g.FixTetrimino()
 
 	if g.Ticks == 0 {
+		g.ClearLines()
+		g.ComputeFullLines()
 		g.Fall()
 		g.Ticks = g.Stats.GetTickRate()
 		return
@@ -117,8 +121,10 @@ func (g *Grid) FixTetrimino() {
 		}
 	}
 
-	g.ClearLines()
 	g.SpawnTetrimino()
+
+	// Force grid ticks, re-sync grid with tetrimino spawn
+	g.Ticks = 0
 }
 
 func (g *Grid) ResetFixDelay() bool {
@@ -192,8 +198,8 @@ func (g *Grid) CollidesAt(x, y, rotIdx int) bool {
 	return false
 }
 
-func (g *Grid) ClearLines() {
-	linesCleared := 0
+func (g *Grid) ComputeFullLines() {
+	g.ToClear = nil
 
 	for y := g.H - 1; y >= 0; y-- {
 		full := true
@@ -205,26 +211,50 @@ func (g *Grid) ClearLines() {
 		}
 
 		if full {
-			linesCleared++
+			g.ToClear = append(g.ToClear, y)
+		}
+	}
+}
 
-			// Move down
-			for ty := y; ty > 0; ty-- {
-				for x := 0; x < g.W; x++ {
-					g.Bricks[ty*g.W+x] = g.Bricks[(ty-1)*g.W+x]
-				}
-			}
+func (g *Grid) IsClearedLine(y int) bool {
+	if g.ToClear == nil {
+		return false
+	}
 
-			// Clear the top line
-			for x := 0; x < g.W; x++ {
-				g.Bricks[x] = nil
-			}
-
-			// Stay on the same line
-			y++
+	for _, line := range g.ToClear {
+		if line == y {
+			return true
 		}
 	}
 
-	g.Stats.AddLines(linesCleared)
+	return false
+}
+
+func (g *Grid) ClearLines() {
+	if len(g.ToClear) == 0 {
+		return
+	}
+	/*
+		for _, y := range g.ToClear {
+			for x := 0; x < g.W; x++ {
+				g.Bricks[y*g.W+x] = nil
+			}
+		}
+
+	*/
+
+	g.Stats.AddLines(len(g.ToClear))
+
+	// Shift lines down
+	for y := len(g.ToClear) - 1; y >= 0; y-- {
+		for shiftY := g.ToClear[y]; shiftY > 0; shiftY-- {
+			for x := 0; x < g.W; x++ {
+				g.Bricks[shiftY*g.W+x] = g.Bricks[(shiftY-1)*g.W+x]
+			}
+		}
+	}
+
+	g.ToClear = nil
 }
 
 // CONTROLS

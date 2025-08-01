@@ -75,7 +75,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// Running
 	screen.DrawImage(g.Background, nil)
 	g.GridView.Draw(screen)
-	g.GridView.DrawCenteredTetriminoAt(screen, g.Grid.Next, 880.0, 200.0)
+	g.GridView.DrawCenteredTetriminoAt(screen, g.Grid.Next, 868.0, 210.0)
 
 	ui.PanelPrintf(
 		screen, ui.BottomRight,

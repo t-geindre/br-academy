@@ -13,9 +13,9 @@ func NewStats() *Stats {
 }
 
 func (s *Stats) Reset() {
-	s.Level = 0
+	s.Level = 31
 	s.Score = 0
-	s.Lines = 0
+	s.Lines = 30000
 }
 
 func (s *Stats) AddLines(lines int) {

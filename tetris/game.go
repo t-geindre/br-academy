@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"os"
 	"tetris/grid"
 	"ui"
@@ -22,12 +21,16 @@ type Game struct {
 	Background    *ebiten.Image
 	Grid          *grid.Grid
 	GridView      *grid.View
+	Controls      *Controls
 }
 
 func NewGame() *Game {
+	gr := grid.NewGrid(10, 20)
+
 	return &Game{
-		State: StateInit,
-		Grid:  grid.NewGrid(10, 20),
+		State:    StateInit,
+		Grid:     gr,
+		Controls: NewControls(gr),
 	}
 }
 
@@ -46,21 +49,7 @@ func (g *Game) Update() error {
 	}
 
 	// Running
-	if inpututil.IsKeyJustPressed(ebiten.KeyArrowUp) {
-		g.Grid.Rotate()
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyArrowDown) {
-		g.Grid.MoveDown()
-	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyArrowLeft) {
-		g.Grid.MoveLeft()
-	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyArrowRight) {
-		g.Grid.MoveRight()
-	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyF1) {
-		g.Grid.Reset()
-	}
+	g.Controls.Update()
 	g.Grid.Update()
 
 	return nil

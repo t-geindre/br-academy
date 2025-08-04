@@ -10,8 +10,6 @@ import (
 
 const (
 	StateInit = iota
-	StateLoading
-	StateLoaded
 	StateRunning
 )
 
@@ -27,24 +25,20 @@ type Game struct {
 func NewGame() *Game {
 	gr := grid.NewGrid(10, 20)
 
-	return &Game{
+	g := &Game{
 		State:    StateInit,
 		Grid:     gr,
 		Controls: NewControls(gr),
 	}
+
+	go g.Init()
+
+	return g
 }
 
 func (g *Game) Update() error {
-	// Load assets
+	// Assets loading
 	if g.State == StateInit {
-		g.State = StateLoading
-		go g.Init()
-		return nil
-	}
-
-	// Setup
-	if g.State == StateLoaded {
-		g.State = StateRunning
 		return nil
 	}
 
@@ -57,7 +51,7 @@ func (g *Game) Update() error {
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	// Init
-	if g.State == StateInit || g.State == StateLoading {
+	if g.State == StateInit {
 		ui.PanelPrintf(screen, ui.BottomRight, "Loading...")
 		return
 	}
@@ -80,6 +74,7 @@ func (g *Game) Layout(x, y int) (int, int) {
 	if g.State == StateRunning {
 		return g.Width, g.Height
 	}
+
 	return x, y
 }
 
@@ -117,5 +112,5 @@ func (g *Game) Init() {
 
 	ebiten.SetWindowSize(g.Width, g.Height)
 
-	g.State = StateLoaded
+	g.State = StateRunning
 }

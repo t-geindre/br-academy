@@ -234,14 +234,6 @@ func (g *Grid) ClearLines() {
 	if len(g.ToClear) == 0 {
 		return
 	}
-	/*
-		for _, y := range g.ToClear {
-			for x := 0; x < g.W; x++ {
-				g.Bricks[y*g.W+x] = nil
-			}
-		}
-
-	*/
 
 	g.Stats.AddLines(len(g.ToClear))
 

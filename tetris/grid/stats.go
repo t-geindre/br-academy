@@ -13,7 +13,7 @@ func NewStats() *Stats {
 }
 
 func (s *Stats) Reset() {
-	s.Level = 30
+	s.Level = 0
 	s.Score = 0
 	s.Lines = 0
 }

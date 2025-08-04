@@ -1,0 +1,61 @@
+package shaders
+//kage:unit pixels
+
+var RectW float
+var RectH float
+
+var Offset float
+
+var Color vec4
+var Thickness float
+var Feather  float    // largeur du dégradé (px), ex: 1.5–3.0
+
+var Time float
+
+const TWO_PI = 6.283185307179586
+
+// a, b, c, d sont des vec3 (R,G,B) pour contrôler la base, l’amplitude, la fréquence et le décalage
+func cosPalette(t float, a vec3, b vec3, c vec3, d vec3) vec3 {
+    return a + b * cos(TWO_PI * (c*t + d))
+}
+
+func palNeon(t float) vec3 {
+    return cosPalette(
+        t,
+        vec3(0.29,1.00,0.69),
+        vec3(0.60,0.66,0.00),
+        vec3(0.16,0.48,0.97),
+        vec3(0.58,0.34,0.00),
+    )
+}
+
+func palSunset(t float) vec3 {
+    return cosPalette(t,
+        vec3(0.30, 0.20, 0.15),
+        vec3(0.70, 0.45, 0.25),
+        vec3(0.10, 0.11, 0.12),
+        vec3(0.05, 0.25, 0.80))
+}
+
+
+func Fragment(pos vec4, _uv vec2, _col vec4) vec4 {
+    // coordonnées locales par rapport au coin du rectangle
+    x := pos.x - Offset
+    y := pos.y - Offset
+
+    // hors zone (on laisse un delta pour le feather ext.)
+    if x < -Feather || y < -Feather { return vec4(0) }
+    if x > RectW+Feather || y > RectH+Feather { return vec4(0) }
+
+    // distance au bord intérieur
+    dx := min(x, RectW - x)
+    dy := min(y, RectH - y)
+    d  := min(dx, dy)
+
+    // plein jusqu’à Thickness, puis dégradé jusqu’à Thickness+Feather
+    t := 1.0 - smoothstep(Thickness, Thickness+Feather, d)
+    if t <= 0.0 { return vec4(0) }
+
+    col := palNeon(Time * 0.001 + t * 0.5)
+    return vec4(col.rgb * t, t)
+}

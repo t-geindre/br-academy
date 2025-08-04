@@ -56,9 +56,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		return
 	}
 
-	screen.DrawImage(g.Background, nil)
+	//screen.DrawImage(g.Background, nil)
 	g.GridView.Draw(screen)
-	g.GridView.DrawCenteredTetriminoAt(screen, g.Grid.Next, 868.0, 210.0)
+	//g.GridView.DrawCenteredTetriminoAt(screen, g.Grid.Next, 868.0, 210.0)
 
 	ui.DrawFTPS(screen)
 }
@@ -80,10 +80,11 @@ func (g *Game) Init() {
 			g.Grid, 64, 32,
 			g.Loader.GetImage("brick"),
 			g.Loader.GetShader("disappear"),
+			g.Loader.GetShader("grid"),
 		)
 
-		bds := g.Background.Bounds()
-		g.Width, g.Height = bds.Dx(), bds.Dy()
+		//bds := g.Background.Bounds()
+		g.Width, g.Height = 360, 720 // todo fixme
 
 		ebiten.SetWindowSize(g.Width, g.Height)
 

@@ -9,26 +9,38 @@ type Clearing struct {
 }
 
 type View struct {
-	Grid             *Grid
-	Brick            *ebiten.Image
-	BrickW, BrickH   int
-	OffsetX, OffsetY int
-	Clearings        []*Clearing
-	TempLine         *ebiten.Image
-	DisappearShd     *ebiten.Shader
+	Grid       *Grid
+	Brick      *ebiten.Image
+	BrickSize  int
+	BrickPad   int
+	BrickSpace int
+	Offset     int
+	Clearings  []*Clearing
+	TempLine   *ebiten.Image
+	Time       float32
+
+	// Shaders
+	DisappearShd *ebiten.Shader
+	GridShd      *ebiten.Shader
 }
 
-func NewView(g *Grid, ox, oy int, b *ebiten.Image, dsh *ebiten.Shader) *View {
-	bds := b.Bounds()
+func NewView(g *Grid, ox, oy int, b *ebiten.Image, dsh, gsh *ebiten.Shader) *View {
+	bPad := 32
+	bSize := 96
+	bSpace := 4
+
 	return &View{
-		Grid:         g,
-		Brick:        b,
-		BrickW:       bds.Dx(),
-		BrickH:       bds.Dy(),
-		OffsetX:      ox,
-		OffsetY:      oy,
-		TempLine:     ebiten.NewImage(g.W*bds.Dx(), bds.Dy()),
+		Grid:       g,
+		Brick:      b,
+		BrickSize:  bSize,
+		BrickSpace: bSpace,
+		BrickPad:   bPad,
+
+		Offset:   0,
+		TempLine: ebiten.NewImage(bSize, bSize*g.W+bSpace*(g.W-1)),
+
 		DisappearShd: dsh,
+		GridShd:      gsh,
 	}
 }
 
@@ -39,68 +51,36 @@ func (v *View) Draw(screen *ebiten.Image) {
 		}
 
 		for x := 0; x < v.Grid.W; x++ {
-			i := y*v.Grid.W + x
-			opts := v.Grid.Bricks[i]
-			if opts != nil {
-				v.DrawBrickAtGridPos(screen, x, y, opts)
+			opts := v.Grid.Bricks[y*v.Grid.W+x]
+			if opts == nil {
+				continue
 			}
+			v.DrawAtGridPos(screen, x, y, opts)
 		}
 	}
 
-	v.DrawClearings(screen)
-
+	// Draw active one
 	if v.Grid.Active != nil {
-		v.DrawTetriminoAtGridPos(screen, v.Grid.Active, v.Grid.Active.X, v.Grid.Active.Y)
-	}
-}
-
-func (v *View) DrawTetriminoAt(dest *ebiten.Image, tetrimino *FallingTetrimino, x, y float64) {
-	shape := tetrimino.Shape.Shapes[tetrimino.RotIdx]
-
-	for row := 0; row < 4; row++ {
-		for col := 0; col < 4; col++ {
-			if shape.S[row*4+col] != 0 {
-				bx := x + float64(col*v.BrickW)
-				by := y + float64(row*v.BrickH)
-
-				if by < float64(v.OffsetY) {
-					continue
-				}
-
-				v.drawBrick(dest, bx, by, tetrimino.Shape.Color)
+		act := v.Grid.Active
+		y := 0
+		for x, p := range act.Shape.Shapes[act.RotIdx].S {
+			if p != 0 {
+				v.DrawAtGridPos(screen, act.X+x%4, act.Y+y, v.Grid.Active.Shape.Color)
+			}
+			if x%4 == 3 {
+				y++
 			}
 		}
 	}
 }
 
-func (v *View) DrawCenteredTetriminoAt(dest *ebiten.Image, t *FallingTetrimino, centerX, centerY float64) {
-	shape := t.Shape.Shapes[t.RotIdx]
-
-	w := 4 - shape.L - shape.R
-	h := 4 - shape.T - shape.B
-
-	offsetX := centerX - float64(w*v.BrickW)/2 - float64(shape.L*v.BrickW)
-	offsetY := centerY - float64(h*v.BrickH)/2 - float64(shape.T*v.BrickH)
-
-	v.DrawTetriminoAt(dest, t, offsetX, offsetY)
-}
-
-func (v *View) DrawTetriminoAtGridPos(dest *ebiten.Image, tetrimino *FallingTetrimino, gx, gy int) {
-	x := float64(gx*v.BrickW + v.OffsetX)
-	y := float64(gy*v.BrickH + v.OffsetY)
-	v.DrawTetriminoAt(dest, tetrimino, x, y)
-}
-
-func (v *View) DrawBrickAtGridPos(dest *ebiten.Image, gx, gy int, opts *ebiten.DrawImageOptions) {
-	x := float64(gx*v.BrickW + v.OffsetX)
-	y := float64(gy*v.BrickH + v.OffsetY)
-	v.drawBrick(dest, x, y, opts)
-}
-
-func (v *View) drawBrick(dest *ebiten.Image, x, y float64, opts *ebiten.DrawImageOptions) {
+func (v *View) DrawAtGridPos(screen *ebiten.Image, x, y int, opts *ebiten.DrawImageOptions) {
 	opts.GeoM.Reset()
-	opts.GeoM.Translate(x, y)
-	dest.DrawImage(v.Brick, opts)
+	opts.GeoM.Translate(
+		float64(v.Offset-v.BrickPad+x*(v.BrickPad+v.BrickSpace)),
+		float64(v.Offset-v.BrickPad+y*(v.BrickPad+v.BrickSpace)),
+	)
+	screen.DrawImage(v.Brick, opts)
 }
 
 func (v *View) isClearing(y int) bool {
@@ -126,30 +106,4 @@ func (v *View) isClearing(y int) bool {
 	}
 
 	return false
-}
-
-func (v *View) DrawClearings(screen *ebiten.Image) {
-	for _, c := range v.Clearings {
-		for x := 0; x < v.Grid.W; x++ {
-			opts := v.Grid.Bricks[c.Line*v.Grid.W+x]
-			opts.GeoM.Reset()
-			opts.GeoM.Translate(float64(x*v.BrickW), 0)
-			v.TempLine.DrawImage(v.Brick, opts)
-		}
-
-		threshold := float32(c.Ticks)/float32(c.TicksEnd)*float32(v.Grid.W*v.BrickW) + float32(v.OffsetX)
-
-		opts := &ebiten.DrawRectShaderOptions{
-			Uniforms: map[string]interface{}{
-				"Threshold": threshold,
-				"OffsetX":   float32(v.OffsetX),
-				"OffsetY":   float32(v.OffsetY + c.Line*v.BrickH),
-			},
-			Images: [4]*ebiten.Image{
-				v.TempLine,
-			},
-		}
-		opts.GeoM.Translate(float64(v.OffsetX), float64(c.Line*v.BrickH+v.OffsetY))
-		screen.DrawRectShader(v.Grid.W*v.BrickW, v.BrickH, v.DisappearShd, opts)
-	}
 }

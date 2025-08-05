@@ -4,7 +4,8 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"tetris/assets"
 	"tetris/grid"
-	"ui"
+	"tetris/ui"
+	debug "ui"
 )
 
 const (
@@ -18,6 +19,7 @@ type Game struct {
 	Grid          *grid.Grid
 	GridView      *grid.View
 	Controls      *Controls
+	Background    *ui.Background
 	Loader        *assets.Loader
 }
 
@@ -46,20 +48,22 @@ func (g *Game) Update() error {
 	g.Controls.Update()
 	g.Grid.Update()
 	g.GridView.Update()
+	g.Background.Update()
 
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	if g.State == StateInit {
-		ui.PanelPrintf(screen, ui.BottomRight, "Loading...")
+		debug.PanelPrintf(screen, debug.BottomRight, "Loading...")
 		return
 	}
 
+	g.Background.Draw(screen)
 	g.GridView.Draw(screen)
 	g.GridView.DrawCenteredTetriminoAt(screen, g.Grid.Next, 500.0, 210.0)
 
-	ui.DrawFTPS(screen)
+	debug.DrawFTPS(screen)
 }
 
 func (g *Game) Layout(x, y int) (int, int) {
@@ -79,6 +83,10 @@ func (g *Game) Init() {
 			g.Loader.GetImage("brick"),
 			g.Loader.GetShader("disappear"),
 			g.Loader.GetShader("grid"),
+		)
+
+		g.Background = ui.NewBackground(
+			g.Loader.GetShader("background"),
 		)
 
 		g.Width, g.Height = 720, 820 // todo fixme

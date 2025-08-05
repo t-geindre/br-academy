@@ -8,6 +8,7 @@ func GetAssetsLoader() *assets.Loader {
 	loader.AddImage("brick", "assets/imgs/brick_glow.png")
 	loader.AddShader("disappear", "assets/shaders/disappear.kage")
 	loader.AddShader("grid", "assets/shaders/grid.kage")
+	loader.AddShader("background", "assets/shaders/background.kage")
 
 	return loader
 }

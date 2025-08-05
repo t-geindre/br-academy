@@ -4,6 +4,7 @@ go 1.24.1
 
 require (
 	github.com/hajimehoshi/ebiten/v2 v2.8.8
+	golang.org/x/image v0.20.0
 	ui v0.0.0-00010101000000-000000000000
 )
 

@@ -9,6 +9,7 @@ type Grid struct {
 	W, H   int
 	Bricks []*ebiten.DrawImageOptions // Nil is empty
 
+	// Todo there is no need for a next, Bag7[0] should be enought
 	Active, Next *FallingTetrimino
 	Tetriminos   [7]Tetrimino
 	Bag7         []Tetrimino
@@ -214,20 +215,6 @@ func (g *Grid) ComputeFullLines() {
 			g.ToClear = append(g.ToClear, y)
 		}
 	}
-}
-
-func (g *Grid) IsClearedLine(y int) bool {
-	if g.ToClear == nil {
-		return false
-	}
-
-	for _, line := range g.ToClear {
-		if line == y {
-			return true
-		}
-	}
-
-	return false
 }
 
 func (g *Grid) ClearLines() {

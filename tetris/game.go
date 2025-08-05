@@ -15,7 +15,6 @@ const (
 type Game struct {
 	State         int
 	Width, Height int
-	Background    *ebiten.Image
 	Grid          *grid.Grid
 	GridView      *grid.View
 	Controls      *Controls
@@ -46,6 +45,7 @@ func (g *Game) Update() error {
 	// Running
 	g.Controls.Update()
 	g.Grid.Update()
+	g.GridView.Update()
 
 	return nil
 }
@@ -56,9 +56,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		return
 	}
 
-	//screen.DrawImage(g.Background, nil)
 	g.GridView.Draw(screen)
-	//g.GridView.DrawCenteredTetriminoAt(screen, g.Grid.Next, 868.0, 210.0)
+	g.GridView.DrawCenteredTetriminoAt(screen, g.Grid.Next, 500.0, 210.0)
 
 	ui.DrawFTPS(screen)
 }
@@ -75,7 +74,6 @@ func (g *Game) Init() {
 	go func() {
 		g.Loader.MustLoad()
 
-		g.Background = g.Loader.GetImage("background")
 		g.GridView = grid.NewView(
 			g.Grid, 64, 32,
 			g.Loader.GetImage("brick"),
@@ -83,8 +81,7 @@ func (g *Game) Init() {
 			g.Loader.GetShader("grid"),
 		)
 
-		//bds := g.Background.Bounds()
-		g.Width, g.Height = 360, 720 // todo fixme
+		g.Width, g.Height = 720, 820 // todo fixme
 
 		ebiten.SetWindowSize(g.Width, g.Height)
 

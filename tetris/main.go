@@ -5,7 +5,6 @@ import (
 )
 
 func main() {
-
 	err := ebiten.RunGame(
 		NewGame(GetAssetsLoader()),
 	)

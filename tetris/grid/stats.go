@@ -3,9 +3,10 @@ package grid
 import "github.com/hajimehoshi/ebiten/v2"
 
 type Stats struct {
-	Level int
-	Score int
-	Lines int
+	Level    int
+	Score    int
+	Lines    int
+	TickRate int
 }
 
 func NewStats() *Stats {
@@ -16,6 +17,7 @@ func (s *Stats) Reset() {
 	s.Level = 0
 	s.Score = 0
 	s.Lines = 0
+	s.TickRate = int(48.0 / 60.0 * float64(ebiten.TPS()))
 }
 
 func (s *Stats) AddLines(lines int) {
@@ -24,11 +26,9 @@ func (s *Stats) AddLines(lines int) {
 	}
 
 	s.Lines += lines
-	s.Level = s.Lines / 10
 	s.Score += []int{0, 100, 300, 500, 800}[lines] * (s.Level + 1)
-}
+	s.Level = s.Lines / 10
 
-func (s *Stats) GetTickRate() int {
 	for _, r := range []struct {
 		l int
 		m float64
@@ -40,9 +40,14 @@ func (s *Stats) GetTickRate() int {
 		{30, 8.0 / 60.0},
 	} {
 		if s.Level <= r.l {
-			return int(r.m * float64(ebiten.TPS()))
+			s.TickRate = int(r.m * float64(ebiten.TPS()))
+			return
 		}
 	}
 
-	return int(1.0 / 60.0 * float64(ebiten.TPS()))
+	s.TickRate = int(1.0 / 60.0 * float64(ebiten.TPS()))
+}
+
+func (s *Stats) GetTickRate() int {
+	return s.TickRate
 }

@@ -1,0 +1,41 @@
+//kage:unit screen
+
+// Couleur de fond unie
+var BaseColor vec3
+
+// Couleur du coin gauche
+var GlowLeft vec3
+
+// Couleur du coin droit
+var GlowRight vec3
+
+// Intensité et propagation
+var Intensity float
+var Spread float
+
+// Temps pour l'animation
+var Time float
+
+// Fonction de bruit sinusoïdal simple
+func noise(p vec2) float {
+    return sin(p.x*0.05 + Time*0.5) * sin(p.y*0.05 + Time*0.7)
+}
+
+func Fragment(pos vec4, uv vec2, col vec4) vec4 {
+    // Position en pixel
+    x := pos.x
+    y := pos.y
+
+    // Distance normalisée depuis les coins
+    distLeft  := length(vec2(x, y)) / Spread
+    distRight := length(vec2(uv.x*imageDstSize().x - imageDstSize().x, y)) / Spread
+
+    // Glow avec atténuation + bruit
+    glowL := GlowLeft * max(0.0, (1.0 - distLeft)) * (0.8 + 0.2 * noise(vec2(x,y)))
+    glowR := GlowRight * max(0.0, (1.0 - distRight)) * (0.8 + 0.2 * noise(vec2(x + 10.0,y + 10.0)))
+
+    // Couleur finale
+    finalColor := BaseColor + Intensity * (glowL + glowR)
+
+    return vec4(finalColor, 1.0)
+}

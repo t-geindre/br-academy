@@ -84,7 +84,7 @@ func GetTetriminos() [7]Tetrimino {
 				"...",
 			),
 		},
-		Color: colorOpts(0.00, 0.00, 1.00, 1.00), // Blue
+		Color: colorOpts(0.20, 0.20, 1.00, 1.00), // Blue
 	}
 
 	// L (Orange)
@@ -208,7 +208,7 @@ func GetTetriminos() [7]Tetrimino {
 				"...",
 			),
 		},
-		Color: colorOpts(0.50, 0.00, 0.50, 1.00), // Purple
+		Color: colorOpts(0.90, 0.00, 0.90, 1.00), // Purple
 	}
 
 	// Z (Red)

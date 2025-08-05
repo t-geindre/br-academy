@@ -24,29 +24,26 @@ type View struct {
 	TempLine  *ebiten.Image
 
 	DisappearShd *ebiten.Shader
-	GridShd      *ebiten.Shader
 }
 
-func NewView(g *Grid, ox, oy int, b *ebiten.Image, dsh, gsh *ebiten.Shader) *View {
+func NewView(g *Grid, offset, spacing int, b *ebiten.Image, dsh *ebiten.Shader) *View {
 	bPad := 32
 	bSize := 96
-	bSpace := 4
 
 	return &View{
 		Grid:       g,
 		Brick:      b,
 		BrickSize:  bSize,
-		BrickSpace: bSpace,
+		BrickSpace: spacing,
 		BrickPad:   bPad,
 
-		Offset: 64,
+		Offset: offset,
 		TempLine: ebiten.NewImage(
-			bSize*g.W-bPad*(g.W*2-1)+bSpace*(g.W-1),
+			bSize*g.W-bPad*(g.W*2-1)+spacing*(g.W-1),
 			bSize,
 		),
 
 		DisappearShd: dsh,
-		GridShd:      gsh,
 	}
 }
 
@@ -90,6 +87,9 @@ func (v *View) DrawClearing(screen *ebiten.Image) {
 		v.TempLine.Clear()
 		for x := 0; x < v.Grid.W; x++ {
 			opts := v.Grid.Bricks[c.Line*v.Grid.W+x]
+			if opts == nil {
+				continue
+			}
 			opts.GeoM.Reset()
 			opts.GeoM.Translate(float64(x*(v.BrickPad+v.BrickSpace)), 0)
 			v.TempLine.DrawImage(v.Brick, opts)
@@ -132,6 +132,10 @@ func (v *View) DrawCenteredTetriminoAt(screen *ebiten.Image, t *FallingTetrimino
 }
 
 func (v *View) DrawBrickAtGridPos(screen *ebiten.Image, x, y int, opts *ebiten.DrawImageOptions) {
+	if y < 0 {
+		return
+	}
+
 	v.DrawBrickAt(
 		screen,
 		float64(v.Offset-v.BrickPad+x*(v.BrickPad+v.BrickSpace)),

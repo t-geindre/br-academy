@@ -67,10 +67,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 }
 
 func (g *Game) Layout(x, y int) (int, int) {
-	if g.State == StateRunning {
-		return g.Width, g.Height
-	}
-
 	return x, y
 }
 
@@ -79,10 +75,9 @@ func (g *Game) Init() {
 		g.Loader.MustLoad()
 
 		g.GridView = grid.NewView(
-			g.Grid, 64, 32,
+			g.Grid, 32, 4,
 			g.Loader.GetImage("brick"),
 			g.Loader.GetShader("disappear"),
-			g.Loader.GetShader("grid"),
 		)
 
 		g.Background = ui.NewBackground(

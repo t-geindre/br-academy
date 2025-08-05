@@ -20,7 +20,7 @@ func (b *Background) Draw(screen *ebiten.Image) {
 			"GlowLeft":  [4]float32{00.098, 0.623, 0.863, 1.0}, // #199FDC
 			"GlowRight": [4]float32{0.510, 0.176, 0.592, 1.0},  // #822D97
 			"Intensity": float32(0.6),                          // Glow boost
-			"Spread":    float32(900.0),                        // Plus → glow large
+			"Spread":    float32(1200.0),                       // Plus → glow large
 
 			"Margin":          float32(32.0),
 			"CornerRadius":    float32(4.0),

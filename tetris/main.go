@@ -5,6 +5,7 @@ import (
 )
 
 func main() {
+	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 	err := ebiten.RunGame(
 		NewGame(GetAssetsLoader()),
 	)

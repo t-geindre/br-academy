@@ -1,10 +1,14 @@
 package assets
 
-import "github.com/hajimehoshi/ebiten/v2"
+import (
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
+)
 
 const (
 	TypeImage = iota
 	TypeShader
+	TypeFont
 )
 
 type toLoad struct {
@@ -15,6 +19,7 @@ type toLoad struct {
 type Loader struct {
 	Shaders map[string]*ebiten.Shader
 	Images  map[string]*ebiten.Image
+	Fonts   map[string]*text.GoTextFaceSource
 	ToLoad  []toLoad
 	Loaded  bool
 }
@@ -23,6 +28,7 @@ func NewLoader() *Loader {
 	return &Loader{
 		Shaders: make(map[string]*ebiten.Shader),
 		Images:  make(map[string]*ebiten.Image),
+		Fonts:   make(map[string]*text.GoTextFaceSource),
 	}
 }
 
@@ -32,6 +38,10 @@ func (l *Loader) AddImage(name, path string) {
 
 func (l *Loader) AddShader(name, path string) {
 	l.Add(name, path, TypeShader)
+}
+
+func (l *Loader) AddFont(name, path string) {
+	l.Add(name, path, TypeFont)
 }
 
 func (l *Loader) Add(name, path string, t int) {
@@ -53,6 +63,8 @@ func (l *Loader) MustLoad() {
 			l.Images[item.Name] = MustLoadImage(item.Path)
 		case TypeShader:
 			l.Shaders[item.Name] = MustLoadShader(item.Path)
+		case TypeFont:
+			l.Fonts[item.Name] = MustLoadFont(item.Path)
 		default:
 			panic("Unknown asset type")
 		}
@@ -77,4 +89,13 @@ func (l *Loader) GetShader(name string) *ebiten.Shader {
 	}
 
 	return shd
+}
+
+func (l *Loader) GetFont(name string) *text.GoTextFaceSource {
+	font, ok := l.Fonts[name]
+	if !ok {
+		panic("Font not found: " + name)
+	}
+
+	return font
 }

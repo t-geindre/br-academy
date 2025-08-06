@@ -119,16 +119,31 @@ func (v *View) DrawClearing(screen *ebiten.Image) {
 	}
 }
 
-func (v *View) DrawCenteredTetriminoAt(screen *ebiten.Image, t *FallingTetrimino, x, y float64) {
+func (v *View) DrawCenteredTetriminoAt(screen *ebiten.Image, t *FallingTetrimino, cx, cy float64) {
+	shape := t.Shape.Shapes[t.RotIdx]
 	opts := t.Shape.Color
-	for i, p := range t.Shape.Shapes[t.RotIdx].S {
+
+	width := 4 - shape.L - shape.R
+	height := 4 - shape.T - shape.B
+
+	step := float64(v.BrickPad + v.BrickSpace)
+
+	offsetX := cx - float64(shape.L)*step - float64(width)*step/2
+	offsetY := cy - float64(shape.T)*step - float64(height)*step/2
+
+	for i, p := range shape.S {
 		if p != 0 {
-			v.DrawBrickAt(
-				screen,
-				x+float64(i%4*(v.BrickPad+v.BrickSpace)),
-				y+float64(i/4*(v.BrickPad+v.BrickSpace)),
-				opts,
-			)
+			col := i % 4
+			row := i / 4
+
+			if col < shape.L || col >= 4-shape.R || row < shape.T || row >= 4-shape.B {
+				continue
+			}
+
+			x := offsetX + float64(col)*step
+			y := offsetY + float64(row)*step
+
+			v.DrawBrickAt(screen, x, y, opts)
 		}
 	}
 }

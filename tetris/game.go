@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"tetris/assets"
 	"tetris/grid"
 	"tetris/ui"
@@ -21,6 +22,8 @@ type Game struct {
 	Controls      *Controls
 	Background    *ui.Background
 	Loader        *assets.Loader
+
+	TitleNext *ui.Text
 }
 
 func NewGame(loader *assets.Loader) *Game {
@@ -61,7 +64,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	g.Background.Draw(screen)
 	g.GridView.Draw(screen)
-	g.GridView.DrawCenteredTetriminoAt(screen, g.Grid.Next, 500.0, 210.0)
+	g.GridView.DrawCenteredTetriminoAt(screen, g.Grid.Next, 525.0, 130.0)
+	g.TitleNext.Draw(screen)
 
 	debug.DrawFTPS(screen)
 }
@@ -83,6 +87,15 @@ func (g *Game) Init() {
 
 		g.Background = ui.NewBackground(
 			g.Loader.GetShader("background"),
+		)
+
+		g.TitleNext = ui.NewText(
+			"NEXT",
+			500, 60,
+			&text.GoTextFace{
+				Source: g.Loader.GetFont("bold"),
+				Size:   40,
+			},
 		)
 
 		g.Width, g.Height = 720, 820 // todo fixme

@@ -24,8 +24,8 @@ func (b *Background) Draw(screen *ebiten.Image) {
 
 			"Margin":          float32(32.0),
 			"CornerRadius":    float32(4.0),
-			"BorderThickness": float32(2.0),
-			"BorderColor":     [4]float32{.9, .9, .9, 1}, // White border
+			"BorderThickness": float32(1.0),
+			"BorderColor":     [4]float32{.7, .7, .7, 1}, // White border
 
 			"Time": b.Time,
 		},

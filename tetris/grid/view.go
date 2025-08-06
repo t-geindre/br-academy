@@ -24,9 +24,10 @@ type View struct {
 	TempLine  *ebiten.Image
 
 	DisappearShd *ebiten.Shader
+	GridShd      *ebiten.Shader
 }
 
-func NewView(g *Grid, offset, spacing int, b *ebiten.Image, dsh *ebiten.Shader) *View {
+func NewView(g *Grid, offset, spacing int, b *ebiten.Image, dsh, gsh *ebiten.Shader) *View {
 	bPad := 32
 	bSize := 96
 
@@ -44,10 +45,12 @@ func NewView(g *Grid, offset, spacing int, b *ebiten.Image, dsh *ebiten.Shader) 
 		),
 
 		DisappearShd: dsh,
+		GridShd:      gsh,
 	}
 }
 
 func (v *View) Draw(screen *ebiten.Image) {
+	v.DrawBackground(screen)
 	v.DrawGrid(screen)
 	v.DrawActive(screen)
 	v.DrawClearing(screen)
@@ -182,4 +185,24 @@ toClear:
 			Ticks: 0,
 		})
 	}
+}
+
+func (v *View) DrawBackground(screen *ebiten.Image) {
+	offset := float64(v.Offset - v.BrickSpace/2)
+
+	opts := &ebiten.DrawRectShaderOptions{
+		Uniforms: map[string]interface{}{
+			"CellSize":  float32(v.BrickSize - (v.BrickPad * 2) + v.BrickSpace),
+			"LineWidth": float32(1.0),
+			"LineColor": [4]float32{.08, .08, .08, .01},
+			"Offset":    offset,
+		},
+	}
+	opts.GeoM.Translate(float64(offset), float64(offset))
+
+	screen.DrawRectShader(
+		(v.BrickSize-(v.BrickPad*2)+v.BrickSpace)*v.Grid.W,
+		(v.BrickSize-(v.BrickPad*2)+v.BrickSpace)*v.Grid.H,
+		v.GridShd, opts,
+	)
 }

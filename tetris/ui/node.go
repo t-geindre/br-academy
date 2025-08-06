@@ -9,10 +9,6 @@ const (
 	OrientationHorizontal = iota
 	OrientationVertical
 
-	PositionStart
-	PositionEnd
-	PositionCenter
-
 	UnitPixel
 	UnitPercentage
 )
@@ -22,27 +18,28 @@ type Node struct {
 	Children []*Node
 	Parent   *Node
 
-	Orientation uint8
-	Position    uint8
+	ContentOrientation uint8
+	ContentSpacing     int
+	ContentSpacingUnit uint8
 
-	Padding     [2]int
+	Padding     [4]int
 	PaddingUnit uint8
 
-	Margin     [2]int
-	MarginUnit uint8
+	Size int // Preferred size px
 
-	MinSize int
-	MaxSize int
+	Grow   float64 // Grow factor for the node
+	Shrink float64 // Shrink factor for the node
 
 	W, H, X, Y int
 }
 
 func NewNode(component Component) *Node {
 	return &Node{
-		Component:   component,
-		Children:    []*Node{},
-		Orientation: OrientationVertical,
-		Position:    PositionCenter,
+		Component:          component,
+		Children:           []*Node{},
+		ContentOrientation: OrientationVertical,
+		ContentSpacingUnit: UnitPixel,
+		PaddingUnit:        UnitPixel,
 	}
 }
 

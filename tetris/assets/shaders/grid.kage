@@ -9,7 +9,7 @@ var Offset float
 func Fragment(pos vec4, _uv vec2, _col vec4) vec4 {
     local := pos.yx - Offset
 
-    if local.x <= 1.0 || local.y <= 1.0 {
+    if local.x <= LineWidth || local.y <= LineWidth {
         return vec4(0)
     }
 

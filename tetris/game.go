@@ -75,7 +75,7 @@ func (g *Game) Init() {
 		g.Loader.MustLoad()
 
 		g.GridView = grid.NewView(
-			g.Grid, 48, 4,
+			g.Grid, 48, 4, 32,
 			g.Loader.GetImage("brick"),
 			g.Loader.GetShader("disappear"),
 			g.Loader.GetShader("grid"),

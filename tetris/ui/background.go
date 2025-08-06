@@ -1,6 +1,9 @@
 package ui
 
-import "github.com/hajimehoshi/ebiten/v2"
+import (
+	"github.com/hajimehoshi/ebiten/v2"
+	"math"
+)
 
 type Background struct {
 	Shader *ebiten.Shader
@@ -14,6 +17,7 @@ func NewBackground(shader *ebiten.Shader) *Background {
 }
 
 func (b *Background) Draw(screen *ebiten.Image) {
+	bds := screen.Bounds()
 	opts := &ebiten.DrawRectShaderOptions{
 		Uniforms: map[string]interface{}{
 			"BaseColor": [4]float32{0.047, 0.051, 0.271, 1.0},  // #0C0D45
@@ -22,7 +26,7 @@ func (b *Background) Draw(screen *ebiten.Image) {
 			"Intensity": float32(0.6),                          // Glow boost
 			"Spread":    float32(1200.0),                       // Plus → glow large
 
-			"Margin":          float32(32.0),
+			"Margin":          float32(math.Max(float64(bds.Dx()), float64(bds.Dy())) * 0.05),
 			"CornerRadius":    float32(4.0),
 			"BorderThickness": float32(1.0),
 			"BorderColor":     [4]float32{.7, .7, .7, 1}, // White border

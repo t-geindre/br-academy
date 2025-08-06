@@ -27,21 +27,20 @@ type View struct {
 	GridShd      *ebiten.Shader
 }
 
-func NewView(g *Grid, offset, spacing int, b *ebiten.Image, dsh, gsh *ebiten.Shader) *View {
-	bPad := 32
-	bSize := 96
+func NewView(g *Grid, offset, spacing, padding int, b *ebiten.Image, dsh, gsh *ebiten.Shader) *View {
+	bds := b.Bounds()
 
 	return &View{
 		Grid:       g,
 		Brick:      b,
-		BrickSize:  bSize,
+		BrickSize:  bds.Dx(),
 		BrickSpace: spacing,
-		BrickPad:   bPad,
+		BrickPad:   padding,
 
 		Offset: offset,
 		TempLine: ebiten.NewImage(
-			bSize*g.W-bPad*(g.W*2-1)+spacing*(g.W-1),
-			bSize,
+			bds.Dx()*g.W-padding*(g.W*2-1)+spacing*(g.W-1),
+			bds.Dx(),
 		),
 
 		DisappearShd: dsh,

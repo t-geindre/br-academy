@@ -17,7 +17,6 @@ func GetLayout() *ui.Node {
 	h.Size = 780
 
 	v := ConstrainNode(1, 10, 1, h, ui.OrientationVertical)
-	v.Padding = [4]int{5, 5, 5, 5}
 
 	m.Append(GetPusher(0, 1, 0))
 
@@ -27,13 +26,58 @@ func GetLayout() *ui.Node {
 	grid.Size = 588
 	m.Append(grid)
 
-	m.Append(GetPusher(0, 5, 0))
+	m.Append(GetPusher(0, 2, 1))
+
+	stats := ui.NewNode(nil)
+	stats.ContentOrientation = ui.OrientationVertical
+	stats.Grow = 5
+	stats.Size = 200
+	m.Append(stats)
+
+	next := ui.NewNode(nil)
+	next.ContentOrientation = ui.OrientationVertical
+	next.Grow = 1
+	stats.Append(next)
+
+	nextTitle := ui.NewNode(nil)
+	nextTitle.Component = NewComponent("Next (T)")
+	nextTitle.Size = 100
+	next.Append(nextTitle)
+
+	nextValue := ui.NewNode(nil)
+	nextValue.Component = NewComponent("Next (V)")
+	nextValue.Size = 100
+	next.Append(nextValue)
 
 	score := ui.NewNode(nil)
-	score.Component = NewComponent("SCORE")
-	score.Grow = 5
-	score.Size = 292
-	m.Append(score)
+	score.ContentOrientation = ui.OrientationVertical
+	score.Grow = 1
+	stats.Append(score)
+
+	scoreTitle := ui.NewNode(nil)
+	scoreTitle.Component = NewComponent("Score (T)")
+	scoreTitle.Size = 100
+	score.Append(scoreTitle)
+
+	scoreValue := ui.NewNode(nil)
+	scoreValue.Component = NewComponent("Score (V)")
+	scoreValue.Size = 100
+	score.Append(scoreValue)
+
+	lines := ui.NewNode(nil)
+	lines.ContentOrientation = ui.OrientationVertical
+	lines.Grow = 1
+	stats.Append(lines)
+
+	linesTitle := ui.NewNode(nil)
+	linesTitle.Component = NewComponent("Lines (T)")
+	linesTitle.Size = 100
+	lines.Append(linesTitle)
+
+	linesValue := ui.NewNode(nil)
+	linesValue.Component = NewComponent("Lines (V)")
+	linesValue.Size = 100
+	lines.Append(linesValue)
 
 	m.Append(GetPusher(0, 1, 0))
 

@@ -45,6 +45,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	g.DrawNode(g.layout.Root, screen)
 	if g.drawAll {
 		ui2.DrawFTPS(screen)
+		ww, wh := ebiten.WindowSize()
+		ui2.PanelPrintf(screen, ui2.TopRight, "%d x %d", ww, wh)
 	}
 }
 
@@ -87,7 +89,7 @@ func (g *Game) Layout(w, h int) (int, int) {
 }
 
 func main() {
-	ebiten.SetWindowSize(720, 820)
+	ebiten.SetWindowSize(1024, 768)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 	_ = ebiten.RunGame(NewGame())
 }

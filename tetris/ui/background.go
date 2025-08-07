@@ -5,9 +5,10 @@ import (
 )
 
 type Background struct {
-	Shader                 *ebiten.Shader
-	Time                   float32
-	MinX, MinY, MaxX, MaxY int
+	Shader    *ebiten.Shader
+	Time      float32
+	BoardPos  [2]float32
+	BoardSize [2]float32
 }
 
 func NewBackground(shader *ebiten.Shader) *Background {
@@ -25,10 +26,8 @@ func (b *Background) Draw(screen *ebiten.Image) {
 			"Intensity": float32(0.6),                          // Glow boost
 			"Spread":    float32(1200.0),                       // Plus → glow large
 
-			"MinX": float32(b.MinX),
-			"MinY": float32(b.MinY),
-			"MaxX": float32(b.MaxX),
-			"MaxY": float32(b.MaxY),
+			"BoardPos":  b.BoardPos,
+			"BoardSize": b.BoardSize,
 
 			"CornerRadius":    float32(4.0),
 			"BorderThickness": float32(1.0),
@@ -46,9 +45,9 @@ func (b *Background) Update() {
 }
 
 func (b *Background) SetSize(width, height int) {
-	b.MaxX, b.MaxY = b.MinX+width, b.MinY+height
+	b.BoardSize = [2]float32{float32(width), float32(height)}
 }
 
 func (b *Background) SetPosition(x, y int) {
-	b.MinX, b.MinY = x, y
+	b.BoardPos = [2]float32{float32(x), float32(y)}
 }

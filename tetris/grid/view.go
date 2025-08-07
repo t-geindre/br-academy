@@ -18,7 +18,7 @@ type View struct {
 	BrickPad   int
 	BrickSpace int
 
-	Offset int
+	OffsetX, OffsetY int
 
 	Clearings []*Clearing
 	TempLine  *ebiten.Image
@@ -27,7 +27,7 @@ type View struct {
 	GridShd      *ebiten.Shader
 }
 
-func NewView(g *Grid, offset, spacing, padding int, b *ebiten.Image, dsh, gsh *ebiten.Shader) *View {
+func NewView(g *Grid, spacing, padding int, b *ebiten.Image, dsh, gsh *ebiten.Shader) *View {
 	bds := b.Bounds()
 
 	return &View{
@@ -37,7 +37,6 @@ func NewView(g *Grid, offset, spacing, padding int, b *ebiten.Image, dsh, gsh *e
 		BrickSpace: spacing,
 		BrickPad:   padding,
 
-		Offset: offset,
 		TempLine: ebiten.NewImage(
 			bds.Dx()*g.W-padding*(g.W*2-1)+spacing*(g.W-1),
 			bds.Dx(),
@@ -98,7 +97,7 @@ func (v *View) DrawClearing(screen *ebiten.Image) {
 		}
 
 		bds := v.TempLine.Bounds()
-		rx, ry := float64(v.Offset-v.BrickPad), float64(v.Offset-v.BrickPad+c.Line*(v.BrickPad+v.BrickSpace))
+		rx, ry := float64(v.OffsetX-v.BrickPad), float64(v.OffsetY-v.BrickPad+c.Line*(v.BrickPad+v.BrickSpace))
 
 		thr := float64(c.Ticks) / float64(v.Grid.Stats.GetTickRate()) * float64(bds.Dx())
 		thr = math.Max(math.Min(thr, float64(bds.Dx())), 0) // Clamp, [0, bds.Dx()]
@@ -155,8 +154,8 @@ func (v *View) DrawBrickAtGridPos(screen *ebiten.Image, x, y int, opts *ebiten.D
 
 	v.DrawBrickAt(
 		screen,
-		float64(v.Offset-v.BrickPad+x*(v.BrickPad+v.BrickSpace)),
-		float64(v.Offset-v.BrickPad+y*(v.BrickPad+v.BrickSpace)),
+		float64(v.OffsetX-v.BrickPad+x*(v.BrickPad+v.BrickSpace)),
+		float64(v.OffsetY-v.BrickPad+y*(v.BrickPad+v.BrickSpace)),
 		opts,
 	)
 }
@@ -202,21 +201,28 @@ toClear:
 }
 
 func (v *View) DrawBackground(screen *ebiten.Image) {
-	offset := float64(v.Offset - v.BrickSpace/2)
+	offsetX := float64(v.OffsetX - v.BrickSpace/2)
+	offsetY := float64(v.OffsetY - v.BrickSpace/2)
+
+	w := (v.BrickSize - (v.BrickPad * 2) + v.BrickSpace) * v.Grid.W
+	h := (v.BrickSize - (v.BrickPad * 2) + v.BrickSpace) * v.Grid.H
 
 	opts := &ebiten.DrawRectShaderOptions{
 		Uniforms: map[string]interface{}{
 			"CellSize":  float32(v.BrickSize - (v.BrickPad * 2) + v.BrickSpace),
 			"LineWidth": float32(1.0),
 			"LineColor": [4]float32{.08, .08, .08, .01},
-			"Offset":    offset,
+			"Offset":    [2]float64{offsetX, offsetY},
 		},
 	}
-	opts.GeoM.Translate(float64(offset), float64(offset))
+	opts.GeoM.Translate(offsetX, offsetY)
 
-	screen.DrawRectShader(
-		(v.BrickSize-(v.BrickPad*2)+v.BrickSpace)*v.Grid.W,
-		(v.BrickSize-(v.BrickPad*2)+v.BrickSpace)*v.Grid.H,
-		v.GridShd, opts,
-	)
+	screen.DrawRectShader(w, h, v.GridShd, opts)
+}
+
+func (v *View) SetSize(width, height int) {
+}
+
+func (v *View) SetPosition(x, y int) {
+	v.OffsetX, v.OffsetY = x, y
 }

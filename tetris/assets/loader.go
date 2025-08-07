@@ -54,7 +54,7 @@ func (l *Loader) Add(name, path string, t int) {
 
 func (l *Loader) MustLoad() {
 	if l.Loaded {
-		panic("Loader already loaded")
+		panic("loader already loaded")
 	}
 
 	for _, item := range l.ToLoad {

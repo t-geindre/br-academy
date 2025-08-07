@@ -69,8 +69,8 @@ func (g *Game) DrawNode(node *ui.Node, screen *ebiten.Image) {
 		)
 
 		str := fmt.Sprintf(
-			"Grow: %.2f\nShrink: %.2f\nSize: %d\nW: %d\nH: %d",
-			node.Grow, node.Shrink, node.Size, node.W, node.H,
+			"Grow: %.2f, Shrink: %.2f\nSize: %d (%d,%d)\nPos: %d,%d",
+			node.Grow, node.Shrink, node.Size, node.W, node.H, node.X, node.Y,
 		)
 		if node.Component != nil {
 			str = fmt.Sprintf("%s\n%s", node.Component.(Component).Name, str)

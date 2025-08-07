@@ -8,6 +8,7 @@ import (
 type Text struct {
 	Content string
 	X, Y    float64
+	W, H    float64
 	Size    float64
 	Face    text.Face
 }
@@ -25,4 +26,12 @@ func (t *Text) Draw(screen *ebiten.Image) {
 	opts := &text.DrawOptions{}
 	opts.GeoM.Translate(t.X, t.Y)
 	text.Draw(screen, t.Content, t.Face, opts)
+}
+
+func (t *Text) SetSize(width, height int) {
+	t.W, t.H = float64(width), float64(height)
+}
+
+func (t *Text) SetPosition(x, y int) {
+	t.X, t.Y = float64(x), float64(y)
 }

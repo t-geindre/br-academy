@@ -4,11 +4,8 @@ package shaders
 var CellSize float
 var LineWidth float
 var LineColor vec4
-var Offset float
 
-func Fragment(pos vec4, _uv vec2, _col vec4) vec4 {
-    local := pos.yx - Offset
-
+func Fragment(pos vec4, local vec2, _col vec4) vec4 {
     if local.x <= LineWidth || local.y <= LineWidth {
         return vec4(0)
     }

@@ -12,36 +12,44 @@ var Spread float
 // Animation
 var Time float
 
-// Game zone
-var Margin float
+// Game zone (remplace MarginX/Y)
+var MinX float
+var MinY float
+var MaxX float
+var MaxY float
+
 var CornerRadius float
 var BorderThickness float
 var BorderColor vec4
 
-// Animation noise
+// --- Utilities
+
 func noise(p vec2) float {
     return 0.8 + 0.2 * sin((p.x + p.y) * 0.01 + Time * 0.01)
 }
 
-// Rounded rect
 func roundRectDist(p, size vec2, radius float) float {
     q := abs(p - size * 0.5) - size * 0.5 + vec2(radius, radius)
     return length(max(q, vec2(0))) - radius
 }
+
+// --- Main
 
 func Fragment(pos vec4, uv vec2, col vec4) vec4 {
     x := pos.x
     y := pos.y
     canvas := imageDstSize()
 
-    boardPos := vec2(Margin, Margin)
-    boardSize := canvas - vec2(Margin * 2.0, Margin * 2.0)
+    // Configurable board size and position
+    boardPos := vec2(MinX, MinY)
+    boardSize := vec2(MaxX - MinX, MaxY - MinY)
     localPos := vec2(x, y) - boardPos
 
-    SpreadL := Spread * 1.5 * (0.95 + 0.05 * sin(Time/120))
-    SpreadR := Spread * 1.5 * (0.95 + 0.05 * sin(Time/60))
+    // Glow
+    SpreadL := Spread * 1.5 * (0.95 + 0.05 * sin(Time / 120))
+    SpreadR := Spread * 1.5 * (0.95 + 0.05 * sin(Time / 60))
 
-    distLeft  := length(vec2(x, y)) / SpreadL
+    distLeft := length(vec2(x, y)) / SpreadL
     distRight := length(vec2(canvas.x - x, y)) / SpreadR
 
     glowL := GlowLeft * max(0.0, (1.0 - distLeft))
@@ -49,12 +57,11 @@ func Fragment(pos vec4, uv vec2, col vec4) vec4 {
 
     background := BaseColor + Intensity * (glowL + glowR)
 
-
-    // Distance au bord du rectangle arrondi
+    // Contours
     d := roundRectDist(localPos, boardSize, CornerRadius)
 
     if d < 0.0 {
-        return background - vec4(.2,.2,.2,0)
+        return background - vec4(0.2, 0.2, 0.2, 0)
     }
 
     if d < BorderThickness {

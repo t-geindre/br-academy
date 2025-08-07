@@ -15,25 +15,26 @@ const (
 )
 
 type Game struct {
-	State         int
-	Width, Height int
-	Grid          *grid.Grid
-	GridView      *grid.View
-	Controls      *Controls
-	Background    *ui.Background
-	Loader        *assets.Loader
-
-	TitleNext *ui.Text
+	state         int
+	width, height int
+	grid          *grid.Grid
+	gridView      *grid.View
+	controls      *Controls
+	background    *ui.Background
+	loader        *assets.Loader
+	layout        *Layout
+	TitleNext     *ui.Text
 }
 
 func NewGame(loader *assets.Loader) *Game {
 	gr := grid.NewGrid(10, 20)
 
 	g := &Game{
-		State:    StateInit,
-		Grid:     gr,
-		Controls: NewControls(gr),
-		Loader:   loader,
+		state:    StateInit,
+		grid:     gr,
+		controls: NewControls(gr),
+		loader:   loader,
+		layout:   NewLayout(1024, 768),
 	}
 
 	g.Init()
@@ -43,28 +44,29 @@ func NewGame(loader *assets.Loader) *Game {
 
 func (g *Game) Update() error {
 	// Assets loading
-	if g.State == StateInit {
+	if g.state == StateInit {
 		return nil
 	}
 
 	// Running
-	g.Controls.Update()
-	g.Grid.Update()
-	g.GridView.Update()
-	g.Background.Update()
+	g.controls.Update()
+	g.grid.Update()
+	g.gridView.Update()
+	g.background.Update()
+	g.layout.Update()
 
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	if g.State == StateInit {
+	if g.state == StateInit {
 		debug.PanelPrintf(screen, debug.BottomRight, "Loading...")
 		return
 	}
 
-	g.Background.Draw(screen)
-	g.GridView.Draw(screen)
-	g.GridView.DrawCenteredTetriminoAt(screen, g.Grid.Next, 525.0, 130.0)
+	g.background.Draw(screen)
+	g.gridView.Draw(screen)
+	g.gridView.DrawCenteredTetriminoAt(screen, g.grid.Next, 525.0, 130.0)
 	g.TitleNext.Draw(screen)
 
 	debug.DrawFTPS(screen)
@@ -76,32 +78,35 @@ func (g *Game) Layout(x, y int) (int, int) {
 
 func (g *Game) Init() {
 	go func() {
-		g.Loader.MustLoad()
+		g.loader.MustLoad()
 
-		g.GridView = grid.NewView(
-			g.Grid, 48, 4, 32,
-			g.Loader.GetImage("brick"),
-			g.Loader.GetShader("disappear"),
-			g.Loader.GetShader("grid"),
+		g.gridView = grid.NewView(
+			g.grid, 4, 32,
+			g.loader.GetImage("brick"),
+			g.loader.GetShader("disappear"),
+			g.loader.GetShader("grid"),
 		)
+		g.layout.Grid.Component = g.gridView
 
-		g.Background = ui.NewBackground(
-			g.Loader.GetShader("background"),
+		g.background = ui.NewBackground(
+			g.loader.GetShader("background"),
 		)
+		g.layout.Container.Component = g.background
 
 		g.TitleNext = ui.NewText(
 			"NEXT",
 			500, 60,
 			&text.GoTextFace{
-				Source: g.Loader.GetFont("bold"),
+				Source: g.loader.GetFont("bold"),
 				Size:   40,
 			},
 		)
+		g.layout.NextTitle.Component = g.TitleNext
 
-		g.Width, g.Height = 720, 820 // todo fixme
+		g.width, g.height = 1024, 768 // todo fixme
 
-		ebiten.SetWindowSize(g.Width, g.Height)
+		ebiten.SetWindowSize(g.width, g.height)
 
-		g.State = StateRunning
+		g.state = StateRunning
 	}()
 }

@@ -8,12 +8,13 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"image/color"
 	"math/rand"
+	"tetris/game"
 	"tetris/ui"
 	ui2 "ui"
 )
 
 type Game struct {
-	layout  *ui.Layout
+	layout  *game.Layout
 	colors  map[*ui.Node]color.Color
 	drawAll bool
 }
@@ -21,18 +22,13 @@ type Game struct {
 func NewGame() *Game {
 
 	return &Game{
-		layout:  ui.NewLayout(GetLayout()),
-		colors:  make(map[*ui.Node]color.Color),
-		drawAll: true,
+		layout: game.NewLayout(820, 760),
+		colors: make(map[*ui.Node]color.Color),
 	}
 }
 
 func (g *Game) Update() error {
-	ww, wh := ebiten.WindowSize()
-	g.layout.Root.W = ww
-	g.layout.Root.H = wh
-	g.layout.Root.Size = wh
-	g.layout.Apply()
+	g.layout.Update()
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyF1) {
 		g.drawAll = !g.drawAll
@@ -51,7 +47,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 }
 
 func (g *Game) DrawNode(node *ui.Node, screen *ebiten.Image) {
-	if node.Component != nil || g.drawAll {
+	if len(node.Name) > 0 || g.drawAll {
 		if g.colors[node] == nil {
 			g.colors[node] = color.RGBA{
 				R: uint8(rand.Intn(100) + 55),
@@ -72,8 +68,8 @@ func (g *Game) DrawNode(node *ui.Node, screen *ebiten.Image) {
 			"Grow: %.2f, Shrink: %.2f\nSize: %d (%d,%d)\nPos: %d,%d",
 			node.Grow, node.Shrink, node.Size, node.W, node.H, node.X, node.Y,
 		)
-		if node.Component != nil {
-			str = fmt.Sprintf("%s\n%s", node.Component.(Component).Name, str)
+		if len(node.Name) > 0 {
+			str = fmt.Sprintf("%s\n%s", node.Name, str)
 		}
 
 		ebitenutil.DebugPrintAt(screen, str, node.X+5, node.Y+5)

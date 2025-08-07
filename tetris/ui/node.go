@@ -31,6 +31,8 @@ type Node struct {
 	Shrink float64 // Shrink factor for the node
 
 	W, H, X, Y int
+
+	Name string // Optional name for debugging
 }
 
 func NewNode(component Component) *Node {

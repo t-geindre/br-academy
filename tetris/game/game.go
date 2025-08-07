@@ -1,10 +1,10 @@
-package main
+package game
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"tetris/assets"
-	"tetris/grid"
+	grid2 "tetris/game/grid"
 	"tetris/ui"
 	debug "ui"
 )
@@ -17,17 +17,20 @@ const (
 type Game struct {
 	state         int
 	width, height int
-	grid          *grid.Grid
-	gridView      *grid.View
+	grid          *grid2.Grid
+	gridView      *grid2.View
 	controls      *Controls
 	background    *ui.Background
 	loader        *assets.Loader
 	layout        *Layout
-	TitleNext     *ui.Text
+
+	TitleNext  *ui.Text
+	TitleScore *ui.Text
+	TitleLevel *ui.Text
 }
 
 func NewGame(loader *assets.Loader) *Game {
-	gr := grid.NewGrid(10, 20)
+	gr := grid2.NewGrid(10, 20)
 
 	g := &Game{
 		state:    StateInit,
@@ -67,7 +70,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	g.background.Draw(screen)
 	g.gridView.Draw(screen)
 	g.gridView.DrawCenteredTetriminoAt(screen, g.grid.Next, 525.0, 130.0)
+
 	g.TitleNext.Draw(screen)
+	g.TitleScore.Draw(screen)
+	g.TitleLevel.Draw(screen)
 
 	debug.DrawFTPS(screen)
 }
@@ -80,7 +86,7 @@ func (g *Game) Init() {
 	go func() {
 		g.loader.MustLoad()
 
-		g.gridView = grid.NewView(
+		g.gridView = grid2.NewView(
 			g.grid, 4, 32,
 			g.loader.GetImage("brick"),
 			g.loader.GetShader("disappear"),
@@ -93,15 +99,19 @@ func (g *Game) Init() {
 		)
 		g.layout.Container.Component = g.background
 
-		g.TitleNext = ui.NewText(
-			"NEXT",
-			500, 60,
-			&text.GoTextFace{
-				Source: g.loader.GetFont("bold"),
-				Size:   40,
-			},
-		)
+		titleFont := &text.GoTextFace{
+			Source: g.loader.GetFont("bold"),
+			Size:   40,
+		}
+
+		g.TitleNext = ui.NewText("NEXT", 500, 60, titleFont)
 		g.layout.NextTitle.Component = g.TitleNext
+
+		g.TitleScore = ui.NewText("SCORE", 500, 120, titleFont)
+		g.layout.ScoreTitle.Component = g.TitleScore
+
+		g.TitleLevel = ui.NewText("LEVEL", 500, 180, titleFont)
+		g.layout.LevelTitle.Component = g.TitleLevel
 
 		g.width, g.height = 1024, 768 // todo fixme
 

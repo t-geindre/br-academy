@@ -1,10 +1,11 @@
 package game
 
 import (
+	"component"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"tetris/assets"
-	grid2 "tetris/game/grid"
+	"tetris/game/grid"
 	"tetris/ui"
 	debug "ui"
 )
@@ -17,20 +18,20 @@ const (
 type Game struct {
 	state         int
 	width, height int
-	grid          *grid2.Grid
-	gridView      *grid2.View
+	grid          *grid.Grid
+	gridView      *grid.View
 	controls      *Controls
 	background    *ui.Background
 	loader        *assets.Loader
 	layout        *Layout
 
-	TitleNext  *ui.Text
-	TitleScore *ui.Text
-	TitleLevel *ui.Text
+	TitleNext  *component.Text
+	TitleScore *component.Text
+	TitleLevel *component.Text
 }
 
 func NewGame(loader *assets.Loader) *Game {
-	gr := grid2.NewGrid(10, 20)
+	gr := grid.NewGrid(10, 20)
 
 	g := &Game{
 		state:    StateInit,
@@ -86,7 +87,7 @@ func (g *Game) Init() {
 	go func() {
 		g.loader.MustLoad()
 
-		g.gridView = grid2.NewView(
+		g.gridView = grid.NewView(
 			g.grid, 4, 32,
 			g.loader.GetImage("brick"),
 			g.loader.GetShader("disappear"),
@@ -104,13 +105,13 @@ func (g *Game) Init() {
 			Size:   40,
 		}
 
-		g.TitleNext = ui.NewText("NEXT", 500, 60, titleFont)
+		g.TitleNext = component.NewText("NEXT", 500, 60, titleFont)
 		g.layout.NextTitle.Component = g.TitleNext
 
-		g.TitleScore = ui.NewText("SCORE", 500, 120, titleFont)
+		g.TitleScore = component.NewText("SCORE", 500, 120, titleFont)
 		g.layout.ScoreTitle.Component = g.TitleScore
 
-		g.TitleLevel = ui.NewText("LEVEL", 500, 180, titleFont)
+		g.TitleLevel = component.NewText("LEVEL", 500, 180, titleFont)
 		g.layout.LevelTitle.Component = g.TitleLevel
 
 		g.width, g.height = 1024, 768 // todo fixme

@@ -1,9 +1,4 @@
-package ui
-
-type Component interface {
-	SetSize(width, height int)
-	SetPosition(x, y int)
-}
+package layout
 
 const (
 	OrientationHorizontal = iota

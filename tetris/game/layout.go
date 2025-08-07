@@ -2,24 +2,24 @@ package game
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
-	"tetris/ui"
+	"layout"
 )
 
 type Layout struct {
-	layout *ui.Layout
-	Root   *ui.Node
+	layout *layout.Layout
+	Root   *layout.Node
 
-	Container *ui.Node
-	Grid      *ui.Node
+	Container *layout.Node
+	Grid      *layout.Node
 
-	NextTitle *ui.Node
-	NextValue *ui.Node
+	NextTitle *layout.Node
+	NextValue *layout.Node
 
-	ScoreTitle *ui.Node
-	ScoreValue *ui.Node
+	ScoreTitle *layout.Node
+	ScoreValue *layout.Node
 
-	LevelTitle *ui.Node
-	LevelValue *ui.Node
+	LevelTitle *layout.Node
+	LevelValue *layout.Node
 
 	MinW, MinH int
 }
@@ -31,7 +31,7 @@ func NewLayout(minW, minH int) *Layout {
 	}
 
 	root := l.build()
-	l.layout = ui.NewLayout(root)
+	l.layout = layout.NewLayout(root)
 	l.Root = root
 
 	return l
@@ -47,12 +47,12 @@ func (l *Layout) Update() {
 
 // Minimal target is 760, 820
 
-func (l *Layout) build() *ui.Node {
-	root := ui.NewNode(nil)
-	root.ContentOrientation = ui.OrientationVertical
+func (l *Layout) build() *layout.Node {
+	root := layout.NewNode(nil)
+	root.ContentOrientation = layout.OrientationVertical
 
-	vert := ui.NewNode(nil)
-	vert.ContentOrientation = ui.OrientationHorizontal
+	vert := layout.NewNode(nil)
+	vert.ContentOrientation = layout.OrientationHorizontal
 	vert.Grow = 0.5
 	vert.Size = l.MinH
 
@@ -60,8 +60,8 @@ func (l *Layout) build() *ui.Node {
 	root.Append(vert)
 	root.Append(l.getPusher(0, 1, 1))
 
-	l.Container = ui.NewNode(nil)
-	l.Container.ContentOrientation = ui.OrientationVertical
+	l.Container = layout.NewNode(nil)
+	l.Container.ContentOrientation = layout.OrientationVertical
 	l.Container.Size = l.MinW
 	l.Container.Grow = .5
 	l.Container.Name = "MAIN CONTAINER"
@@ -70,57 +70,57 @@ func (l *Layout) build() *ui.Node {
 	vert.Append(l.Container)
 	vert.Append(l.getPusher(0, 1, 1))
 
-	innerContainer := ui.NewNode(nil)
+	innerContainer := layout.NewNode(nil)
 	l.Container.Append(l.getPusher(1, 1, 1))
 	l.Container.Append(innerContainer)
 	l.Container.Append(l.getPusher(1, 1, 1))
 
 	innerContainer.Size = l.MinH - 40
-	innerContainer.ContentOrientation = ui.OrientationHorizontal
+	innerContainer.ContentOrientation = layout.OrientationHorizontal
 	innerContainer.ContentSpacing = 10
-	innerContainer.ContentSpacingUnit = ui.UnitPercentage
+	innerContainer.ContentSpacingUnit = layout.UnitPercentage
 	innerContainer.Padding = [4]int{0, 0, 10, 10}
-	innerContainer.PaddingUnit = ui.UnitPercentage
+	innerContainer.PaddingUnit = layout.UnitPercentage
 
 	// 360*720
-	l.Grid = ui.NewNode(nil)
+	l.Grid = layout.NewNode(nil)
 	l.Grid.Name = "GRID"
 	l.Grid.Size = 360
 
-	stats := ui.NewNode(nil)
-	stats.ContentOrientation = ui.OrientationVertical
+	stats := layout.NewNode(nil)
+	stats.ContentOrientation = layout.OrientationVertical
 	stats.Grow = 1
 
-	l.NextTitle = ui.NewNode(nil)
+	l.NextTitle = layout.NewNode(nil)
 	l.NextTitle.Name = "NEXT TITLE"
 	l.NextTitle.Size = 100
 	stats.Append(l.NextTitle)
 
-	l.NextValue = ui.NewNode(nil)
+	l.NextValue = layout.NewNode(nil)
 	l.NextValue.Name = "NEXT VALUE"
 	l.NextValue.Size = 100
 	stats.Append(l.NextValue)
 
 	stats.Append(l.getPusher(1, 1, 1))
 
-	l.ScoreTitle = ui.NewNode(nil)
+	l.ScoreTitle = layout.NewNode(nil)
 	l.ScoreTitle.Name = "SCORE TITLE"
 	l.ScoreTitle.Size = 100
 	stats.Append(l.ScoreTitle)
 
-	l.ScoreValue = ui.NewNode(nil)
+	l.ScoreValue = layout.NewNode(nil)
 	l.ScoreValue.Name = "SCORE VALUE"
 	l.ScoreValue.Size = 100
 	stats.Append(l.ScoreValue)
 
 	stats.Append(l.getPusher(1, 1, 1))
 
-	l.LevelTitle = ui.NewNode(nil)
+	l.LevelTitle = layout.NewNode(nil)
 	l.LevelTitle.Name = "LEVEL TITLE"
 	l.LevelTitle.Size = 100
 	stats.Append(l.LevelTitle)
 
-	l.LevelValue = ui.NewNode(nil)
+	l.LevelValue = layout.NewNode(nil)
 	l.LevelValue.Name = "LEVEL VALUE"
 	l.LevelValue.Size = 100
 	stats.Append(l.LevelValue)
@@ -131,8 +131,8 @@ func (l *Layout) build() *ui.Node {
 	return root
 }
 
-func (l *Layout) getPusher(push int, grow, shrink float64) *ui.Node {
-	pusher := ui.NewNode(nil)
+func (l *Layout) getPusher(push int, grow, shrink float64) *layout.Node {
+	pusher := layout.NewNode(nil)
 	pusher.Size = push
 	pusher.Grow = grow
 	pusher.Shrink = shrink

@@ -2,10 +2,12 @@ package game
 
 import (
 	"component"
+	"control"
 	"debug"
 	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
+	"pool"
 	"tetris/assets"
 	"tetris/game/grid"
 	"ui"
@@ -17,86 +19,36 @@ const (
 )
 
 type Game struct {
-	state         int
-	width, height int
-	grid          *grid.Grid
-	gridView      *grid.View
-	controls      *Controls
-	background    *Background
-	loader        *assets.Loader
-	layout        *Layout
-
-	TitleNext *component.Text
-	ValueNext *Next
-
-	TitleScore *component.Text
-	ValueScore *component.UpdatableText
-
-	TitleLevel *component.Text
-	ValueLevel *component.UpdatableText
-
-	TitleLines *component.Text
-	ValueLines *component.UpdatableText
+	state int
+	pool  *pool.Pool
 }
 
 func NewGame(loader *assets.Loader) *Game {
-	gr := grid.NewGrid(10, 20)
-
 	g := &Game{
-		state:    StateInit,
-		grid:     gr,
-		controls: NewControls(gr),
-		loader:   loader,
-		layout:   NewLayout(600, 760),
+		state: StateInit,
+		pool:  pool.NewPool(),
 	}
 
-	g.Init()
+	go g.Init()
 
 	return g
 }
 
 func (g *Game) Update() error {
-	// Assets loading
-	if g.state == StateInit {
-		return nil
+	if g.state == StateRunning {
+		g.pool.Update()
 	}
-
-	// Running
-	g.controls.Update()
-	g.grid.Update()
-	g.gridView.Update()
-	g.background.Update()
-	g.layout.Update()
-	g.ValueScore.Update()
-	g.ValueLevel.Update()
-	g.ValueLines.Update()
 
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	if g.state == StateInit {
-		ui.DrawPanel(screen, ui.BottomRight, "Loading...")
+	if g.state != StateRunning {
+		ui.DrawPanel(screen, ui.TopLeft, "Loading...")
 		return
 	}
 
-	g.background.Draw(screen)
-	g.gridView.Draw(screen)
-
-	g.TitleNext.Draw(screen)
-	g.ValueNext.Draw(screen)
-
-	g.TitleScore.Draw(screen)
-	g.ValueScore.Draw(screen)
-
-	g.TitleLevel.Draw(screen)
-	g.ValueLevel.Draw(screen)
-
-	g.TitleLines.Draw(screen)
-	g.ValueLines.Draw(screen)
-
-	debug.DrawLayoutNode(screen, g.layout.Root)
-	debug.All(screen)
+	g.pool.Draw(screen)
 }
 
 func (g *Game) Layout(x, y int) (int, int) {
@@ -104,65 +56,108 @@ func (g *Game) Layout(x, y int) (int, int) {
 }
 
 func (g *Game) Init() {
-	go func() {
-		g.loader.MustLoad()
+	// Load assets
+	loader := GetAssetsLoader()
+	loader.MustLoad()
 
-		g.gridView = grid.NewView(
-			g.grid, 4, 32,
-			g.loader.GetImage("brick"),
-			g.loader.GetShader("disappear"),
-			g.loader.GetShader("grid"),
-		)
-		g.layout.Grid.Component = g.gridView
+	// Build layout
+	layout := NewLayout(600, 760)
+	g.pool.Add(layout)
 
-		g.background = NewBackground(
-			g.loader.GetShader("background"),
-		)
-		g.layout.Container.Component = g.background
+	// Background
+	bg := NewBackground(
+		loader.GetShader("background"),
+	)
+	g.pool.Add(bg)
+	layout.Container.Component = bg
 
-		titleFont := &text.GoTextFace{
-			Source: g.loader.GetFont("bold"),
-			Size:   40,
+	// Grid
+	gr := grid.NewGrid(10, 20)
+	g.pool.Add(gr)
+
+	// Controls
+	g.pool.Add(NewControls(gr))
+
+	// Grid view
+	grView := grid.NewView(
+		gr, 4, 32,
+		loader.GetImage("brick"),
+		loader.GetShader("disappear"),
+		loader.GetShader("grid"),
+	)
+	g.pool.Add(grView)
+	layout.Grid.Component = grView
+
+	// Prepare font faces
+	titleFont := &text.GoTextFace{
+		Source: loader.GetFont("bold"),
+		Size:   40,
+	}
+	normalFont := &text.GoTextFace{
+		Source: loader.GetFont("normal"),
+		Size:   40,
+	}
+
+	// Next piece
+	nextTitle := component.NewText("NEXT", 0, 0, titleFont)
+	g.pool.Add(nextTitle)
+	layout.NextTitle.Component = nextTitle
+
+	nextValue := NewNext(gr, grView)
+	g.pool.Add(nextValue)
+	layout.NextValue.Component = nextValue
+
+	// Score
+	scoreTitle := component.NewText("SCORE", 0, 0, titleFont)
+	g.pool.Add(scoreTitle)
+	layout.ScoreTitle.Component = scoreTitle
+
+	scoreValue := component.NewUpdatableText(func() string {
+		return fmt.Sprintf("%d", gr.Stats.Score)
+	}, 0, 0, normalFont)
+	g.pool.Add(scoreValue)
+	layout.ScoreValue.Component = scoreValue
+
+	// Level
+	levelTitle := component.NewText("LEVEL", 0, 0, titleFont)
+	g.pool.Add(levelTitle)
+	layout.LevelTitle.Component = levelTitle
+
+	levelValue := component.NewUpdatableText(func() string {
+		return fmt.Sprintf("%d", gr.Stats.Level)
+	}, 0, 0, normalFont)
+	g.pool.Add(levelValue)
+	layout.LevelValue.Component = levelValue
+
+	// Lines
+	linesTitle := component.NewText("LINES", 0, 0, titleFont)
+	g.pool.Add(linesTitle)
+	layout.LinesTitle.Component = linesTitle
+
+	linesValue := component.NewUpdatableText(func() string {
+		return fmt.Sprintf("%d", gr.Stats.Lines)
+	}, 0, 0, normalFont)
+	g.pool.Add(linesValue)
+	layout.LinesValue.Component = linesValue
+
+	// Debug panels
+	dbgOverlayCtrl := control.NewToggle(ebiten.KeyF2)
+	g.pool.Add(dbgOverlayCtrl)
+	g.pool.Add(pool.NewDrawer(func(image *ebiten.Image) {
+		if dbgOverlayCtrl.IsOn() {
+			debug.DrawAll(image)
 		}
+	}))
 
-		g.TitleNext = component.NewText("NEXT", 500, 60, titleFont)
-		g.layout.NextTitle.Component = g.TitleNext
+	// Debug layout
+	dbgLayoutCtrl := control.NewToggle(ebiten.KeyF3)
+	g.pool.Add(dbgLayoutCtrl)
+	g.pool.Add(pool.NewDrawer(func(image *ebiten.Image) {
+		if dbgLayoutCtrl.IsOn() {
+			debug.DrawLayoutNode(image, layout.Root)
+		}
+	}))
 
-		g.ValueNext = NewNext(g.grid, g.gridView)
-		g.layout.NextValue.Component = g.ValueNext
-
-		g.TitleScore = component.NewText("SCORE", 500, 120, titleFont)
-		g.layout.ScoreTitle.Component = g.TitleScore
-
-		g.ValueScore = component.NewUpdatableText(
-			func() string {
-				return fmt.Sprintf("%d", g.grid.Stats.Score)
-			}, 500, 150, titleFont)
-		g.layout.ScoreValue.Component = g.ValueScore
-
-		g.TitleLevel = component.NewText("LEVEL", 500, 180, titleFont)
-		g.layout.LevelTitle.Component = g.TitleLevel
-
-		g.ValueLevel = component.NewUpdatableText(
-			func() string {
-				return fmt.Sprintf("%d", g.grid.Stats.Level)
-			}, 500, 210, titleFont)
-		g.layout.LevelValue.Component = g.ValueLevel
-
-		g.TitleLines = component.NewText("LINES", 500, 240, titleFont)
-		g.layout.LinesTitle.Component = g.TitleLines
-
-		g.ValueLines = component.NewUpdatableText(
-			func() string {
-				return fmt.Sprintf("%d", g.grid.Stats.Lines)
-			},
-			500, 270, titleFont)
-		g.layout.LinesValue.Component = g.ValueLines
-
-		g.width, g.height = 1024, 768 // todo fixme
-
-		ebiten.SetWindowSize(g.width, g.height)
-
-		g.state = StateRunning
-	}()
+	// Run the game
+	g.state = StateRunning
 }

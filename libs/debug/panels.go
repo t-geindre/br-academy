@@ -23,7 +23,7 @@ func DrawResolutionPos(screen *ebiten.Image, position ui.Position) {
 	ui.DrawPanel(screen, position, "Window: %d x %d\nMonitor: %d x %d", ww, wh, mw, mh)
 }
 
-func All(screen *ebiten.Image) {
+func DrawAll(screen *ebiten.Image) {
 	DrawFTPS(screen)
 	DrawResolution(screen)
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
+	"golang.org/x/image/colornames"
 	"image/color"
 	"layout"
 	"math/rand"
@@ -13,12 +14,6 @@ import (
 
 func DrawLayoutNode(screen *ebiten.Image, n *layout.Node) {
 	col := getNodeColor(n)
-	vector.StrokeRect(
-		screen,
-		float32(n.X), float32(n.Y),
-		float32(n.W), float32(n.H),
-		3, col, false,
-	)
 
 	mx, my := ebiten.CursorPosition()
 	if n.X <= mx && mx < n.X+n.W && n.Y <= my && my < n.Y+n.H {
@@ -31,7 +26,15 @@ func DrawLayoutNode(screen *ebiten.Image, n *layout.Node) {
 			str, n.Grow, n.Shrink, n.Size, n.W, n.H, n.X, n.Y,
 		)
 		ui.DrawPanelAt(screen, float32(n.X)+5, float32(n.Y)+5, str)
+		col = colornames.White
 	}
+
+	vector.StrokeRect(
+		screen,
+		float32(n.X+2), float32(n.Y+2),
+		float32(n.W-3), float32(n.H-3),
+		3, col, false,
+	)
 
 	for _, c := range n.Children {
 		DrawLayoutNode(screen, c)
@@ -55,9 +58,9 @@ func getNodeColor(n *layout.Node) color.Color {
 	if nodeColors[n] == nil {
 		nodeColors[n] = &nodeColor{
 			color: color.RGBA{
-				R: uint8(rand.Intn(100) + 55),
-				G: uint8(rand.Intn(100) + 55),
-				B: uint8(rand.Intn(100) + 55),
+				R: uint8(rand.Intn(150) + 55),
+				G: uint8(rand.Intn(150) + 55),
+				B: uint8(rand.Intn(150) + 55),
 				A: 255,
 			},
 		}

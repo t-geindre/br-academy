@@ -53,15 +53,17 @@ func (l *Layout) Update() {
 func (l *Layout) build() *layout.Node {
 	root := layout.NewNode(nil)
 	root.ContentOrientation = layout.OrientationVertical
+	root.Name = "ROOT"
 
 	vert := layout.NewNode(nil)
 	vert.ContentOrientation = layout.OrientationHorizontal
 	vert.Grow = 0.5
 	vert.Size = l.MinH
+	vert.Name = "HORIZONTAL CONTAINER"
 
-	root.Append(l.getPusher(0, 1, 1))
+	root.Append(l.getPusher(1, 1, "TOP PUSHER"))
 	root.Append(vert)
-	root.Append(l.getPusher(0, 1, 1))
+	root.Append(l.getPusher(1, 1, "BOTTOM PUSHER"))
 
 	l.Container = layout.NewNode(nil)
 	l.Container.ContentOrientation = layout.OrientationVertical
@@ -69,14 +71,14 @@ func (l *Layout) build() *layout.Node {
 	l.Container.Grow = .5
 	l.Container.Name = "MAIN CONTAINER"
 
-	vert.Append(l.getPusher(0, 1, 1))
+	vert.Append(l.getPusher(1, 1, "LEFT PUSHER"))
 	vert.Append(l.Container)
-	vert.Append(l.getPusher(0, 1, 1))
+	vert.Append(l.getPusher(1, 1, "RIGHT PUSHER"))
 
 	innerContainer := layout.NewNode(nil)
-	l.Container.Append(l.getPusher(1, 1, 1))
+	l.Container.Append(l.getPusher(1, 1, "TOP INNER PUSHER"))
 	l.Container.Append(innerContainer)
-	l.Container.Append(l.getPusher(1, 1, 1))
+	l.Container.Append(l.getPusher(1, 1, "BOTTOM INNER PUSHER"))
 
 	innerContainer.Size = l.MinH - 40
 	innerContainer.ContentOrientation = layout.OrientationHorizontal
@@ -93,6 +95,7 @@ func (l *Layout) build() *layout.Node {
 	stats := layout.NewNode(nil)
 	stats.ContentOrientation = layout.OrientationVertical
 	stats.Grow = 1
+	stats.Name = "STATS CONTAINER"
 
 	l.NextTitle = layout.NewNode(nil)
 	l.NextTitle.Name = "NEXT TITLE"
@@ -128,13 +131,13 @@ func (l *Layout) build() *layout.Node {
 
 	stats.Append(l.NextTitle)
 	stats.Append(l.NextValue)
-	stats.Append(l.getPusher(1, 1, 1))
+	stats.Append(l.getPusher(1, 1, "STATS PUSHER"))
 	stats.Append(l.LevelTitle)
 	stats.Append(l.LevelValue)
-	stats.Append(l.getPusher(1, 1, 1))
+	stats.Append(l.getPusher(1, 1, "STATS PUSHER"))
 	stats.Append(l.LinesTitle)
 	stats.Append(l.LinesValue)
-	stats.Append(l.getPusher(1, 1, 1))
+	stats.Append(l.getPusher(1, 1, "STATS PUSHER"))
 	stats.Append(l.ScoreTitle)
 	stats.Append(l.ScoreValue)
 
@@ -144,10 +147,10 @@ func (l *Layout) build() *layout.Node {
 	return root
 }
 
-func (l *Layout) getPusher(push int, grow, shrink float64) *layout.Node {
+func (l *Layout) getPusher(grow, shrink float64, n string) *layout.Node {
 	pusher := layout.NewNode(nil)
-	pusher.Size = push
 	pusher.Grow = grow
 	pusher.Shrink = shrink
+	pusher.Name = n
 	return pusher
 }

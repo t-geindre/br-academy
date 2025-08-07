@@ -1,6 +1,7 @@
 package main
 
 import (
+	"debug"
 	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -10,7 +11,6 @@ import (
 	"layout"
 	"math/rand"
 	"tetris/game"
-	"ui"
 )
 
 type Game struct {
@@ -40,9 +40,7 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.DrawNode(g.layout.Root, screen)
 	if g.drawAll {
-		ui.DrawFTPS(screen)
-		ww, wh := ebiten.WindowSize()
-		ui.PanelPrintf(screen, ui.TopRight, "%d x %d", ww, wh)
+		debug.All(screen)
 	}
 }
 

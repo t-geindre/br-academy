@@ -2,12 +2,13 @@ package game
 
 import (
 	"component"
+	"debug"
 	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"tetris/assets"
 	"tetris/game/grid"
-	debug "ui"
+	"ui"
 )
 
 const (
@@ -75,7 +76,7 @@ func (g *Game) Update() error {
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	if g.state == StateInit {
-		debug.PanelPrintf(screen, debug.BottomRight, "Loading...")
+		ui.DrawPanel(screen, ui.BottomRight, "Loading...")
 		return
 	}
 
@@ -94,7 +95,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	g.TitleLines.Draw(screen)
 	g.ValueLines.Draw(screen)
 
-	debug.DrawFTPS(screen)
+	debug.DrawLayoutNode(screen, g.layout.Root)
+	debug.All(screen)
 }
 
 func (g *Game) Layout(x, y int) (int, int) {

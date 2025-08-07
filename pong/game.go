@@ -262,7 +262,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		mode = "Player"
 	}
 
-	ui.PanelPrintf(screen, ui.TopRight, "[F1] Mode: %s", mode)
+	ui.DrawPanel(screen, ui.TopRight, "[F1] Mode: %s", mode)
 	ui.DrawFTPS(screen)
 }
 

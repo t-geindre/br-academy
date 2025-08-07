@@ -55,3 +55,19 @@ func (t *Text) computePos() {
 	t.X = t.OX + (t.W-w)/2
 	t.Y = t.OY + (t.H-h)/2 // important pour la baseline
 }
+
+type UpdatableText struct {
+	*Text
+	up func() string
+}
+
+func NewUpdatableText(up func() string, x, y float64, face text.Face) *UpdatableText {
+	return &UpdatableText{
+		Text: NewText("", x, y, face),
+		up:   up,
+	}
+}
+
+func (ut *UpdatableText) Update() {
+	ut.SetContent(ut.up())
+}

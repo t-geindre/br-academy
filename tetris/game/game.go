@@ -2,11 +2,11 @@ package game
 
 import (
 	"component"
+	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"tetris/assets"
 	"tetris/game/grid"
-	"tetris/ui"
 	debug "ui"
 )
 
@@ -21,13 +21,21 @@ type Game struct {
 	grid          *grid.Grid
 	gridView      *grid.View
 	controls      *Controls
-	background    *ui.Background
+	background    *Background
 	loader        *assets.Loader
 	layout        *Layout
 
-	TitleNext  *component.Text
+	TitleNext *component.Text
+	ValueNext *Next
+
 	TitleScore *component.Text
+	ValueScore *component.UpdatableText
+
 	TitleLevel *component.Text
+	ValueLevel *component.UpdatableText
+
+	TitleLines *component.Text
+	ValueLines *component.UpdatableText
 }
 
 func NewGame(loader *assets.Loader) *Game {
@@ -38,7 +46,7 @@ func NewGame(loader *assets.Loader) *Game {
 		grid:     gr,
 		controls: NewControls(gr),
 		loader:   loader,
-		layout:   NewLayout(1024, 768),
+		layout:   NewLayout(600, 760),
 	}
 
 	g.Init()
@@ -58,6 +66,9 @@ func (g *Game) Update() error {
 	g.gridView.Update()
 	g.background.Update()
 	g.layout.Update()
+	g.ValueScore.Update()
+	g.ValueLevel.Update()
+	g.ValueLines.Update()
 
 	return nil
 }
@@ -70,11 +81,18 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	g.background.Draw(screen)
 	g.gridView.Draw(screen)
-	g.gridView.DrawCenteredTetriminoAt(screen, g.grid.Next, 525.0, 130.0)
 
 	g.TitleNext.Draw(screen)
+	g.ValueNext.Draw(screen)
+
 	g.TitleScore.Draw(screen)
+	g.ValueScore.Draw(screen)
+
 	g.TitleLevel.Draw(screen)
+	g.ValueLevel.Draw(screen)
+
+	g.TitleLines.Draw(screen)
+	g.ValueLines.Draw(screen)
 
 	debug.DrawFTPS(screen)
 }
@@ -95,7 +113,7 @@ func (g *Game) Init() {
 		)
 		g.layout.Grid.Component = g.gridView
 
-		g.background = ui.NewBackground(
+		g.background = NewBackground(
 			g.loader.GetShader("background"),
 		)
 		g.layout.Container.Component = g.background
@@ -108,11 +126,36 @@ func (g *Game) Init() {
 		g.TitleNext = component.NewText("NEXT", 500, 60, titleFont)
 		g.layout.NextTitle.Component = g.TitleNext
 
+		g.ValueNext = NewNext(g.grid, g.gridView)
+		g.layout.NextValue.Component = g.ValueNext
+
 		g.TitleScore = component.NewText("SCORE", 500, 120, titleFont)
 		g.layout.ScoreTitle.Component = g.TitleScore
 
+		g.ValueScore = component.NewUpdatableText(
+			func() string {
+				return fmt.Sprintf("%d", g.grid.Stats.Score)
+			}, 500, 150, titleFont)
+		g.layout.ScoreValue.Component = g.ValueScore
+
 		g.TitleLevel = component.NewText("LEVEL", 500, 180, titleFont)
 		g.layout.LevelTitle.Component = g.TitleLevel
+
+		g.ValueLevel = component.NewUpdatableText(
+			func() string {
+				return fmt.Sprintf("%d", g.grid.Stats.Level)
+			}, 500, 210, titleFont)
+		g.layout.LevelValue.Component = g.ValueLevel
+
+		g.TitleLines = component.NewText("LINES", 500, 240, titleFont)
+		g.layout.LinesTitle.Component = g.TitleLines
+
+		g.ValueLines = component.NewUpdatableText(
+			func() string {
+				return fmt.Sprintf("%d", g.grid.Stats.Lines)
+			},
+			500, 270, titleFont)
+		g.layout.LinesValue.Component = g.ValueLines
 
 		g.width, g.height = 1024, 768 // todo fixme
 

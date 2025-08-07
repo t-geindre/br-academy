@@ -8,7 +8,7 @@ import (
 func main() {
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 	err := ebiten.RunGame(
-		game.NewGame(GetAssetsLoader()),
+		game.NewGame(game.GetAssetsLoader()),
 	)
 	if err != nil {
 		panic(err)

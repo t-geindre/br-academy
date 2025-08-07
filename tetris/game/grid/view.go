@@ -121,29 +121,25 @@ func (v *View) DrawClearing(screen *ebiten.Image) {
 func (v *View) DrawCenteredTetriminoAt(screen *ebiten.Image, t *FallingTetrimino, cx, cy float64) {
 	shape := t.Shape.Shapes[t.RotIdx]
 	opts := t.Shape.Color
-
-	width := 4 - shape.L - shape.R
-	height := 4 - shape.T - shape.B
-
 	step := float64(v.BrickPad + v.BrickSpace)
 
-	offsetX := cx - float64(shape.L)*step - float64(width)*step/2
-	offsetY := cy - float64(shape.T)*step - float64(height)*step/2
-
 	for i, p := range shape.S {
-		if p != 0 {
-			col := i % 4
-			row := i / 4
-
-			if col < shape.L || col >= 4-shape.R || row < shape.T || row >= 4-shape.B {
-				continue
-			}
-
-			x := offsetX + float64(col)*step
-			y := offsetY + float64(row)*step
-
-			v.DrawBrickAt(screen, x, y, opts)
+		if p == 0 {
+			continue
 		}
+
+		col := float64(i % 4)
+		row := float64(i / 4)
+
+		// Position centrée, en tenant compte du barycentre (grille logique)
+		x := cx + (col-shape.CX)*step
+		y := cy + (row-shape.CY)*step
+
+		// Décalage unique pour corriger la marge graphique du sprite
+		x -= float64(v.BrickPad)
+		y -= float64(v.BrickPad)
+
+		v.DrawBrickAt(screen, x, y, opts)
 	}
 }
 

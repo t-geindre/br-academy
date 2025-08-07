@@ -21,6 +21,9 @@ type Layout struct {
 	LevelTitle *layout.Node
 	LevelValue *layout.Node
 
+	LinesTitle *layout.Node
+	LinesValue *layout.Node
+
 	MinW, MinH int
 }
 
@@ -93,37 +96,47 @@ func (l *Layout) build() *layout.Node {
 
 	l.NextTitle = layout.NewNode(nil)
 	l.NextTitle.Name = "NEXT TITLE"
-	l.NextTitle.Size = 100
-	stats.Append(l.NextTitle)
+	l.NextTitle.Size = 80
 
 	l.NextValue = layout.NewNode(nil)
 	l.NextValue.Name = "NEXT VALUE"
-	l.NextValue.Size = 100
-	stats.Append(l.NextValue)
-
-	stats.Append(l.getPusher(1, 1, 1))
+	l.NextValue.Size = 80
 
 	l.ScoreTitle = layout.NewNode(nil)
 	l.ScoreTitle.Name = "SCORE TITLE"
-	l.ScoreTitle.Size = 100
-	stats.Append(l.ScoreTitle)
+	l.ScoreTitle.Size = 80
 
 	l.ScoreValue = layout.NewNode(nil)
 	l.ScoreValue.Name = "SCORE VALUE"
-	l.ScoreValue.Size = 100
-	stats.Append(l.ScoreValue)
-
-	stats.Append(l.getPusher(1, 1, 1))
+	l.ScoreValue.Size = 80
 
 	l.LevelTitle = layout.NewNode(nil)
 	l.LevelTitle.Name = "LEVEL TITLE"
-	l.LevelTitle.Size = 100
-	stats.Append(l.LevelTitle)
+	l.LevelTitle.Size = 80
 
 	l.LevelValue = layout.NewNode(nil)
 	l.LevelValue.Name = "LEVEL VALUE"
-	l.LevelValue.Size = 100
+	l.LevelValue.Size = 80
+
+	l.LinesTitle = layout.NewNode(nil)
+	l.LinesTitle.Name = "LINES TITLE"
+	l.LinesTitle.Size = 80
+
+	l.LinesValue = layout.NewNode(nil)
+	l.LinesValue.Name = "LINES VALUE"
+	l.LinesValue.Size = 80
+
+	stats.Append(l.NextTitle)
+	stats.Append(l.NextValue)
+	stats.Append(l.getPusher(1, 1, 1))
+	stats.Append(l.LevelTitle)
 	stats.Append(l.LevelValue)
+	stats.Append(l.getPusher(1, 1, 1))
+	stats.Append(l.LinesTitle)
+	stats.Append(l.LinesValue)
+	stats.Append(l.getPusher(1, 1, 1))
+	stats.Append(l.ScoreTitle)
+	stats.Append(l.ScoreValue)
 
 	innerContainer.Append(l.Grid)
 	innerContainer.Append(stats)

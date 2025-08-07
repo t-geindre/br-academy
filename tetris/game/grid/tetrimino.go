@@ -4,7 +4,8 @@ import "github.com/hajimehoshi/ebiten/v2"
 
 type Shape struct {
 	S          [4 * 4]uint8
-	L, R, T, B int // empty space, Left, Right, Bottom
+	L, R, T, B int     // empty space, Left, Right, Bottom
+	CX, CY     float64 // center
 }
 type Shapes [4]Shape
 
@@ -286,6 +287,29 @@ func toShape(rows ...string) Shape {
 	} else {
 		//Empty shape
 		s.L, s.R, s.T, s.B = 4, 4, 4, 4
+	}
+
+	var sumX, sumY float64
+	var count float64
+	for i, v := range s.S {
+		if v == 0 {
+			continue
+		}
+		x := float64(i % 4)
+		y := float64(i / 4)
+		// barycentre en indices de centre de brique
+		sumX += x + 0.5
+		sumY += y + 0.5
+
+		count++
+	}
+
+	if count > 0 {
+		s.CX = sumX / count
+		s.CY = sumY / count
+	} else {
+		s.CX = 1.5 // centre par défaut (vide)
+		s.CY = 1.5
 	}
 
 	return s

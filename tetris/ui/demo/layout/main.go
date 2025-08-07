@@ -7,23 +7,23 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"image/color"
+	"layout"
 	"math/rand"
 	"tetris/game"
-	"tetris/ui"
-	ui2 "ui"
+	"ui"
 )
 
 type Game struct {
 	layout  *game.Layout
-	colors  map[*ui.Node]color.Color
+	colors  map[*layout.Node]color.Color
 	drawAll bool
 }
 
 func NewGame() *Game {
 
 	return &Game{
-		layout: game.NewLayout(820, 760),
-		colors: make(map[*ui.Node]color.Color),
+		layout: game.NewLayout(600, 760),
+		colors: make(map[*layout.Node]color.Color),
 	}
 }
 
@@ -40,13 +40,13 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.DrawNode(g.layout.Root, screen)
 	if g.drawAll {
-		ui2.DrawFTPS(screen)
+		ui.DrawFTPS(screen)
 		ww, wh := ebiten.WindowSize()
-		ui2.PanelPrintf(screen, ui2.TopRight, "%d x %d", ww, wh)
+		ui.PanelPrintf(screen, ui.TopRight, "%d x %d", ww, wh)
 	}
 }
 
-func (g *Game) DrawNode(node *ui.Node, screen *ebiten.Image) {
+func (g *Game) DrawNode(node *layout.Node, screen *ebiten.Image) {
 	if len(node.Name) > 0 || g.drawAll {
 		if g.colors[node] == nil {
 			g.colors[node] = color.RGBA{

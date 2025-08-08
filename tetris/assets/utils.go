@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func mustReadFile(path string) []byte {
+func MustLoadRaw(path string) []byte {
 	raw, err := os.ReadFile(path)
 	if err != nil {
 		panic(err)
@@ -27,7 +27,7 @@ func MustLoadImage(path string) *ebiten.Image {
 }
 
 func MustLoadShader(path string) *ebiten.Shader {
-	shader, err := ebiten.NewShader(mustReadFile(path))
+	shader, err := ebiten.NewShader(MustLoadRaw(path))
 	if err != nil {
 		panic(err)
 	}

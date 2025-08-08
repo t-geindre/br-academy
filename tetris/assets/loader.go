@@ -9,6 +9,7 @@ const (
 	TypeImage = iota
 	TypeShader
 	TypeFont
+	TypeRaw
 )
 
 type toLoad struct {
@@ -20,6 +21,7 @@ type Loader struct {
 	Shaders map[string]*ebiten.Shader
 	Images  map[string]*ebiten.Image
 	Fonts   map[string]*text.GoTextFaceSource
+	Raws    map[string][]byte
 	ToLoad  []toLoad
 	Loaded  bool
 }
@@ -29,6 +31,7 @@ func NewLoader() *Loader {
 		Shaders: make(map[string]*ebiten.Shader),
 		Images:  make(map[string]*ebiten.Image),
 		Fonts:   make(map[string]*text.GoTextFaceSource),
+		Raws:    make(map[string][]byte),
 	}
 }
 
@@ -42,6 +45,10 @@ func (l *Loader) AddShader(name, path string) {
 
 func (l *Loader) AddFont(name, path string) {
 	l.Add(name, path, TypeFont)
+}
+
+func (l *Loader) AddRaw(name, path string) {
+	l.Add(name, path, TypeRaw)
 }
 
 func (l *Loader) Add(name, path string, t int) {
@@ -65,6 +72,8 @@ func (l *Loader) MustLoad() {
 			l.Shaders[item.Name] = MustLoadShader(item.Path)
 		case TypeFont:
 			l.Fonts[item.Name] = MustLoadFont(item.Path)
+		case TypeRaw:
+			l.Raws[item.Name] = MustLoadRaw(item.Path)
 		default:
 			panic("Unknown asset type")
 		}
@@ -98,4 +107,13 @@ func (l *Loader) GetFont(name string) *text.GoTextFaceSource {
 	}
 
 	return font
+}
+
+func (l *Loader) GetRaw(name string) []byte {
+	raw, ok := l.Raws[name]
+	if !ok {
+		panic("Raw data not found: " + name)
+	}
+
+	return raw
 }

@@ -65,9 +65,7 @@ func (g *Game) Init() {
 	g.pool.Add(layout)
 
 	// Background
-	bg := NewBackground(
-		loader.GetShader("background"),
-	)
+	bg := NewBackground(loader.GetShader("background"))
 	g.pool.Add(bg)
 	layout.Container.Component = bg
 
@@ -89,14 +87,8 @@ func (g *Game) Init() {
 	layout.Grid.Component = grView
 
 	// Prepare font faces
-	titleFont := &text.GoTextFace{
-		Source: loader.GetFont("bold"),
-		Size:   40,
-	}
-	normalFont := &text.GoTextFace{
-		Source: loader.GetFont("normal"),
-		Size:   40,
-	}
+	titleFont := &text.GoTextFace{Source: loader.GetFont("bold"), Size: 40}
+	normalFont := &text.GoTextFace{Source: loader.GetFont("normal"), Size: 40}
 
 	// Next piece
 	nextTitle := component.NewText("NEXT", 0, 0, titleFont)

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
+	"image/color"
 	"pool"
 	"tetris/assets"
 	"tetris/game/grid"
@@ -67,7 +68,11 @@ func (g *Game) Init() {
 	// Background
 	bg := NewBackground(loader.GetShader("background"))
 	g.pool.Add(bg)
-	layout.Container.Component = bg
+
+	// Main container
+	container := NewBox(loader.GetShader("box"), color.White, 2, 10, 0.5)
+	g.pool.Add(container)
+	layout.Container.Component = container
 
 	// Grid
 	gr := grid.NewGrid(10, 20)

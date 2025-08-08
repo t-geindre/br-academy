@@ -13,6 +13,7 @@ func GetAssetsLoader() *assets.Loader {
 	loader.AddShader("disappear", "assets/shaders/disappear.kage")
 	loader.AddShader("grid", "assets/shaders/grid.kage")
 	loader.AddShader("background", "assets/shaders/background.kage")
+	loader.AddShader("box", "assets/shaders/box.kage")
 
 	// Fonts
 	loader.AddFont("normal", "assets/fonts/normal.ttf")

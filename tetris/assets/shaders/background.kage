@@ -1,7 +1,6 @@
 package shaders
 //kage:unit pixels
 
-// Background
 var BaseColor vec4
 var GlowLeft vec4
 var GlowRight vec4
@@ -10,16 +9,7 @@ var Intensity float
 var Spread float
 var VertSpread float
 
-// Animation
 var Time float
-
-// Game zone (remplace MarginX/Y)
-var BoardPos vec2
-var BoardSize vec2
-
-var CornerRadius float
-var BorderThickness float
-var BorderColor vec4
 
 func noise(p vec2) float {
     return 0.8 + 0.2 * sin((p.x + p.y) * 0.01 + Time * 0.01)
@@ -31,17 +21,11 @@ func roundRectDist(p, size vec2, radius float) float {
 }
 
 func Fragment(pos vec4) vec4 {
-    canvas := imageDstSize()
-
-
-    // Configurable board size and position
-    localPos := pos.xy - BoardPos
-
     // Glow
     SpreadL := Spread * 1.5 * (0.9 + 0.1 * sin(Time / 120))
     SpreadR := Spread * 1.5 * (0.9 + 0.1 * sin(Time / 60))
 
-    uv := pos.xy / canvas
+    uv := pos.xy / imageDstSize()
     uv.y *= 1-VertSpread
 
 
@@ -51,18 +35,5 @@ func Fragment(pos vec4) vec4 {
     glowL := GlowLeft * exp(-distLeft * distLeft)
     glowR := GlowRight * exp(-distRight * distRight)
 
-    background := BaseColor + Intensity * (glowL + glowR)
-
-    // Contours
-    d := roundRectDist(localPos, BoardSize, CornerRadius)
-
-    if d < 0.0 {
-        return background - vec4(0.2, 0.2, 0.2, 0)
-    }
-
-    if d < BorderThickness {
-        return BorderColor
-    }
-
-    return background
+    return BaseColor + Intensity * (glowL + glowR)
 }

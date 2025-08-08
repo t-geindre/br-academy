@@ -1,0 +1,28 @@
+package shaders
+//kage:unit pixels
+
+var BoxDarken vec4
+
+var CornerRadius float
+var BorderThickness float
+var BorderColor vec4
+
+func roundRectDist(p, size vec2, radius float) float {
+    q := abs(p - size * 0.5) - size * 0.5 + vec2(radius, radius)
+    return length(max(q, vec2(0))) - radius
+}
+
+func Fragment(_ vec4, localPos vec2) vec4 {
+    canvas := imageSrc0Size()
+    d := roundRectDist(localPos, canvas, CornerRadius)
+
+    if d > 0.0 {
+    return vec4(0)
+    }
+
+    if d > -BorderThickness {
+        return BorderColor
+    }
+
+    return BoxDarken
+}

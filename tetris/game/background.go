@@ -11,28 +11,9 @@ type Background struct {
 }
 
 func NewBackground(shader *ebiten.Shader) *Background {
-	return &Background{
-		Shader: shader,
-		Opts: &ebiten.DrawRectShaderOptions{
-			Uniforms: map[string]any{
-				"BaseColor":  [4]float32{0.047, 0.051, 0.271, 1.0},  // #0C0D45
-				"GlowLeft":   [4]float32{00.098, 0.623, 0.863, 1.0}, // #199FDC
-				"GlowRight":  [4]float32{0.510, 0.176, 0.592, 1.0},  // #822D97
-				"Intensity":  float32(.9),
-				"Spread":     float32(.28),
-				"VertSpread": float32(.45),
-
-				"BoardPos":  [2]float32{},
-				"BoardSize": [2]float32{},
-
-				"CornerRadius":    float32(4.0),
-				"BorderThickness": float32(1.0),
-				"BorderColor":     [4]float32{.7, .7, .7, 1},
-
-				"Time": float32(0),
-			},
-		},
-	}
+	b := &Background{}
+	b.setShader(shader)
+	return b
 }
 
 func (b *Background) Draw(screen *ebiten.Image) {
@@ -50,4 +31,19 @@ func (b *Background) SetSize(width, height int) {
 
 func (b *Background) SetPosition(x, y int) {
 	b.Opts.Uniforms["BoardPos"] = [2]float32{float32(x), float32(y)}
+}
+
+func (b *Background) setShader(shader *ebiten.Shader) {
+	b.Shader = shader
+	b.Opts = &ebiten.DrawRectShaderOptions{
+		Uniforms: map[string]any{
+			"BaseColor":  [4]float32{0.047, 0.051, 0.271, 1.0},  // #0C0D45
+			"GlowLeft":   [4]float32{00.098, 0.623, 0.863, 1.0}, // #199FDC
+			"GlowRight":  [4]float32{0.510, 0.176, 0.592, 1.0},  // #822D97
+			"Intensity":  float32(.9),
+			"Spread":     float32(.28),
+			"VertSpread": float32(.45),
+			"Time":       float32(0),
+		},
+	}
 }

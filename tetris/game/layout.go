@@ -51,11 +51,11 @@ func (l *Layout) Update() {
 // Minimal target is 760, 820
 
 func (l *Layout) build() *layout.Node {
-	root := layout.NewNode(nil)
+	root := layout.NewNode()
 	root.ContentOrientation = layout.OrientationVertical
 	root.Name = "ROOT"
 
-	vert := layout.NewNode(nil)
+	vert := layout.NewNode()
 	vert.ContentOrientation = layout.OrientationHorizontal
 	vert.Grow = 0.5
 	vert.Size = l.MinH
@@ -65,7 +65,7 @@ func (l *Layout) build() *layout.Node {
 	root.Append(vert)
 	root.Append(l.getPusher(1, 1, "BOTTOM PUSHER"))
 
-	l.Container = layout.NewNode(nil)
+	l.Container = layout.NewNode()
 	l.Container.ContentOrientation = layout.OrientationVertical
 	l.Container.Size = l.MinW
 	l.Container.Grow = .5
@@ -75,7 +75,7 @@ func (l *Layout) build() *layout.Node {
 	vert.Append(l.Container)
 	vert.Append(l.getPusher(1, 1, "RIGHT PUSHER"))
 
-	innerContainer := layout.NewNode(nil)
+	innerContainer := layout.NewNode()
 	l.Container.Append(l.getPusher(1, 1, "TOP INNER PUSHER"))
 	l.Container.Append(innerContainer)
 	l.Container.Append(l.getPusher(1, 1, "BOTTOM INNER PUSHER"))
@@ -88,44 +88,44 @@ func (l *Layout) build() *layout.Node {
 	innerContainer.PaddingUnit = layout.UnitPercentage
 
 	// 360*720
-	l.Grid = layout.NewNode(nil)
+	l.Grid = layout.NewNode()
 	l.Grid.Name = "GRID"
 	l.Grid.Size = 360
 
-	stats := layout.NewNode(nil)
+	stats := layout.NewNode()
 	stats.ContentOrientation = layout.OrientationVertical
 	stats.Grow = 1
 	stats.Name = "STATS CONTAINER"
 
-	l.NextTitle = layout.NewNode(nil)
+	l.NextTitle = layout.NewNode()
 	l.NextTitle.Name = "NEXT TITLE"
 	l.NextTitle.Size = 80
 
-	l.NextValue = layout.NewNode(nil)
+	l.NextValue = layout.NewNode()
 	l.NextValue.Name = "NEXT VALUE"
 	l.NextValue.Size = 80
 
-	l.ScoreTitle = layout.NewNode(nil)
+	l.ScoreTitle = layout.NewNode()
 	l.ScoreTitle.Name = "SCORE TITLE"
 	l.ScoreTitle.Size = 80
 
-	l.ScoreValue = layout.NewNode(nil)
+	l.ScoreValue = layout.NewNode()
 	l.ScoreValue.Name = "SCORE VALUE"
 	l.ScoreValue.Size = 80
 
-	l.LevelTitle = layout.NewNode(nil)
+	l.LevelTitle = layout.NewNode()
 	l.LevelTitle.Name = "LEVEL TITLE"
 	l.LevelTitle.Size = 80
 
-	l.LevelValue = layout.NewNode(nil)
+	l.LevelValue = layout.NewNode()
 	l.LevelValue.Name = "LEVEL VALUE"
 	l.LevelValue.Size = 80
 
-	l.LinesTitle = layout.NewNode(nil)
+	l.LinesTitle = layout.NewNode()
 	l.LinesTitle.Name = "LINES TITLE"
 	l.LinesTitle.Size = 80
 
-	l.LinesValue = layout.NewNode(nil)
+	l.LinesValue = layout.NewNode()
 	l.LinesValue.Name = "LINES VALUE"
 	l.LinesValue.Size = 80
 
@@ -148,7 +148,7 @@ func (l *Layout) build() *layout.Node {
 }
 
 func (l *Layout) getPusher(grow, shrink float64, n string) *layout.Node {
-	pusher := layout.NewNode(nil)
+	pusher := layout.NewNode()
 	pusher.Grow = grow
 	pusher.Shrink = shrink
 	pusher.Name = n

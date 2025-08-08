@@ -9,9 +9,9 @@ const (
 )
 
 type Node struct {
-	Component
-	Children []*Node
-	Parent   *Node
+	Components []Component
+	Children   []*Node
+	Parent     *Node
 
 	ContentOrientation uint8
 	ContentSpacing     int
@@ -30,9 +30,9 @@ type Node struct {
 	Name string // Optional name for debugging
 }
 
-func NewNode(component Component) *Node {
+func NewNode(components ...Component) *Node {
 	return &Node{
-		Component:          component,
+		Components:         components,
 		Children:           []*Node{},
 		ContentOrientation: OrientationVertical,
 		ContentSpacingUnit: UnitPixel,
@@ -53,4 +53,17 @@ func (n *Node) Remove(child *Node) {
 		}
 	}
 	child.Parent = nil
+}
+
+func (n *Node) Attach(component Component) {
+	n.Components = append(n.Components, component)
+}
+
+func (n *Node) Detach(component Component) {
+	for i, c := range n.Components {
+		if c == component {
+			n.Components = append(n.Components[:i], n.Components[i+1:]...)
+			return
+		}
+	}
 }

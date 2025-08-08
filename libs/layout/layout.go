@@ -69,9 +69,9 @@ func (l *Layout) ApplyNode(n *Node) {
 			cursor += size
 		}
 
-		if child.Component != nil {
-			child.Component.SetPosition(child.X, child.Y)
-			child.Component.SetSize(child.W, child.H)
+		for _, comp := range child.Components {
+			comp.SetPosition(child.X, child.Y)
+			comp.SetSize(child.W, child.H)
 		}
 
 		// Ajoute l'espacement entre les éléments sauf le dernier

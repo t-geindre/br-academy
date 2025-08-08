@@ -72,7 +72,7 @@ func (g *Game) Init() {
 	// Main container
 	container := NewBox(loader.GetShader("box"), color.White, 2, 10, 0.5)
 	g.pool.Add(container)
-	layout.Container.Component = container
+	layout.Container.Attach(container)
 
 	// Grid
 	gr := grid.NewGrid(10, 20)
@@ -89,7 +89,7 @@ func (g *Game) Init() {
 		loader.GetShader("grid"),
 	)
 	g.pool.Add(grView)
-	layout.Grid.Component = grView
+	layout.Grid.Attach(grView)
 
 	// Prepare font faces
 	titleFont := &text.GoTextFace{Source: loader.GetFont("bold"), Size: 40}
@@ -98,44 +98,44 @@ func (g *Game) Init() {
 	// Next piece
 	nextTitle := component.NewText("NEXT", 0, 0, titleFont)
 	g.pool.Add(nextTitle)
-	layout.NextTitle.Component = nextTitle
+	layout.NextTitle.Attach(nextTitle)
 
 	nextValue := NewNext(gr, grView)
 	g.pool.Add(nextValue)
-	layout.NextValue.Component = nextValue
+	layout.NextValue.Attach(nextValue)
 
 	// Score
 	scoreTitle := component.NewText("SCORE", 0, 0, titleFont)
 	g.pool.Add(scoreTitle)
-	layout.ScoreTitle.Component = scoreTitle
+	layout.ScoreTitle.Attach(scoreTitle)
 
 	scoreValue := component.NewUpdatableText(func() string {
 		return fmt.Sprintf("%d", gr.Stats.Score)
 	}, 0, 0, normalFont)
 	g.pool.Add(scoreValue)
-	layout.ScoreValue.Component = scoreValue
+	layout.ScoreValue.Attach(scoreValue)
 
 	// Level
 	levelTitle := component.NewText("LEVEL", 0, 0, titleFont)
 	g.pool.Add(levelTitle)
-	layout.LevelTitle.Component = levelTitle
+	layout.LevelTitle.Attach(levelTitle)
 
 	levelValue := component.NewUpdatableText(func() string {
 		return fmt.Sprintf("%d", gr.Stats.Level)
 	}, 0, 0, normalFont)
 	g.pool.Add(levelValue)
-	layout.LevelValue.Component = levelValue
+	layout.LevelValue.Attach(levelValue)
 
 	// Lines
 	linesTitle := component.NewText("LINES", 0, 0, titleFont)
 	g.pool.Add(linesTitle)
-	layout.LinesTitle.Component = linesTitle
+	layout.LinesTitle.Attach(linesTitle)
 
 	linesValue := component.NewUpdatableText(func() string {
 		return fmt.Sprintf("%d", gr.Stats.Lines)
 	}, 0, 0, normalFont)
 	g.pool.Add(linesValue)
-	layout.LinesValue.Component = linesValue
+	layout.LinesValue.Attach(linesValue)
 
 	// Debug panels
 	dbgOverlayCtrl := control.NewToggle(ebiten.KeyF2)

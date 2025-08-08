@@ -2,21 +2,14 @@ package shaders
 //kage:unit pixels
 
 var Threshold float
-var OffsetX float
-var OffsetY float
 
-func Fragment(pos4 vec4, src vec2, _ vec4) vec4 {
-    posRel := vec2(pos4.x-OffsetX, pos4.y-OffsetY)
-    // Get normalized coordinates
-    color := imageSrc0At(posRel)
+func Fragment(_ vec4, local vec2, _ vec4) vec4 {
+    v := local.x / imageSrc0Size().x
 
-
-    if posRel.x > Threshold {
-        // If the x coordinate is greater than the threshold, return the original color
-        return color
+    if v > Threshold {
+        return imageSrc0At(local)
     }
 
-    // Disappear
     return vec4(0)
 
 }

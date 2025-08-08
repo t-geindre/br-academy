@@ -99,14 +99,12 @@ func (v *View) DrawClearing(screen *ebiten.Image) {
 		bds := v.TempLine.Bounds()
 		rx, ry := float64(v.OffsetX-v.BrickPad), float64(v.OffsetY-v.BrickPad+c.Line*(v.BrickPad+v.BrickSpace))
 
-		thr := float64(c.Ticks) / float64(v.Grid.Stats.GetTickRate()) * float64(bds.Dx())
+		thr := float64(c.Ticks) / float64(v.Grid.Stats.GetTickRate())
 		thr = math.Max(math.Min(thr, float64(bds.Dx())), 0) // Clamp, [0, bds.Dx()]
 
 		opts := &ebiten.DrawRectShaderOptions{
 			Uniforms: map[string]interface{}{
-				"OffsetX":   rx,
-				"OffsetY":   ry,
-				"Threshold": thr,
+				"Threshold": float32(thr),
 			},
 			Images: [4]*ebiten.Image{
 				v.TempLine,

@@ -19,5 +19,8 @@ func GetAssetsLoader() *assets.Loader {
 	loader.AddFont("normal", "assets/fonts/normal.ttf")
 	loader.AddFont("bold", "assets/fonts/bold.ttf")
 
+	// Audios
+	loader.AddRaw("audio-st", "assets/audio/st.mp3")
+
 	return loader
 }

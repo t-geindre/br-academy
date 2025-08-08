@@ -1,16 +1,21 @@
 package game
 
 import (
+	"bytes"
 	"component"
 	"control"
 	"debug"
 	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/audio"
+	"github.com/hajimehoshi/ebiten/v2/audio/mp3"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"image/color"
 	"pool"
 	"tetris/assets"
+	gameaudio "tetris/audio"
 	"tetris/game/grid"
+	"time"
 	"ui"
 )
 
@@ -163,4 +168,25 @@ func (g *Game) Init() {
 
 	// Run the game
 	g.state = StateRunning
+
+	// Fixme testing audio
+	stream, err := mp3.DecodeWithSampleRate(44100, bytes.NewReader(loader.GetRaw("audio-st")))
+	if err != nil {
+		panic(err)
+	}
+
+	looper := gameaudio.NewLooper(44100, stream)
+	oldTheme := looper.AddLoop(0, time.Millisecond*13714)
+	mainTheme := looper.AddLoop(time.Millisecond*41142, time.Millisecond*109714)
+	_, _ = oldTheme, mainTheme
+	looper.Play(mainTheme)
+
+	ctx := audio.NewContext(44100)
+	player, err := ctx.NewPlayer(looper)
+	if err != nil {
+		panic(err)
+	}
+
+	player.SetVolume(1)
+	player.Play()
 }

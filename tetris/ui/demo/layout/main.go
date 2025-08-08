@@ -22,7 +22,7 @@ type Game struct {
 func NewGame() *Game {
 
 	return &Game{
-		layout: game.NewLayout(600, 760),
+		layout: game.NewLayout(),
 		colors: make(map[*layout.Node]color.Color),
 	}
 }

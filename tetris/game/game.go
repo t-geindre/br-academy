@@ -62,7 +62,7 @@ func (g *Game) Init() {
 	loader.MustLoad()
 
 	// Build layout
-	layout := NewLayout(600, 760)
+	layout := NewLayout()
 	g.pool.Add(layout)
 
 	// Background

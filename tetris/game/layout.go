@@ -27,10 +27,10 @@ type Layout struct {
 	MinW, MinH int
 }
 
-func NewLayout(minW, minH int) *Layout {
+func NewLayout() *Layout {
 	l := &Layout{
-		MinW: minW,
-		MinH: minH,
+		MinW: 600,
+		MinH: 760,
 	}
 
 	root := l.build()
@@ -57,8 +57,8 @@ func (l *Layout) build() *layout.Node {
 
 	vert := layout.NewNode()
 	vert.ContentOrientation = layout.OrientationHorizontal
-	vert.Grow = 0.5
-	vert.Size = l.MinH
+	vert.Grow = 0.3
+	vert.Size = 800
 	vert.Name = "HORIZONTAL CONTAINER"
 
 	root.Append(l.getPusher(1, 1, "TOP PUSHER"))
@@ -67,8 +67,8 @@ func (l *Layout) build() *layout.Node {
 
 	l.Container = layout.NewNode()
 	l.Container.ContentOrientation = layout.OrientationVertical
-	l.Container.Size = l.MinW
-	l.Container.Grow = .5
+	l.Container.Size = 700
+	l.Container.Grow = .3
 	l.Container.Name = "MAIN CONTAINER"
 
 	vert.Append(l.getPusher(1, 1, "LEFT PUSHER"))
@@ -82,10 +82,6 @@ func (l *Layout) build() *layout.Node {
 
 	innerContainer.Size = l.MinH - 40
 	innerContainer.ContentOrientation = layout.OrientationHorizontal
-	innerContainer.ContentSpacing = 10
-	innerContainer.ContentSpacingUnit = layout.UnitPercentage
-	innerContainer.Padding = [4]int{0, 0, 10, 10}
-	innerContainer.PaddingUnit = layout.UnitPercentage
 
 	// 360*720
 	l.Grid = layout.NewNode()
@@ -94,7 +90,7 @@ func (l *Layout) build() *layout.Node {
 
 	stats := layout.NewNode()
 	stats.ContentOrientation = layout.OrientationVertical
-	stats.Grow = 1
+	stats.Size = 200
 	stats.Name = "STATS CONTAINER"
 
 	l.NextTitle = layout.NewNode()
@@ -141,8 +137,11 @@ func (l *Layout) build() *layout.Node {
 	stats.Append(l.ScoreTitle)
 	stats.Append(l.ScoreValue)
 
+	innerContainer.Append(l.getPusher(1, 1, "INNER PUSHER"))
 	innerContainer.Append(l.Grid)
+	innerContainer.Append(l.getPusher(1, 1, "INNER PUSHER"))
 	innerContainer.Append(stats)
+	innerContainer.Append(l.getPusher(1, 1, "INNER PUSHER"))
 
 	return root
 }

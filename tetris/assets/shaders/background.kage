@@ -8,6 +8,7 @@ var GlowRight vec4
 
 var Intensity float
 var Spread float
+var VertSpread float
 
 // Animation
 var Time float
@@ -37,14 +38,18 @@ func Fragment(pos vec4) vec4 {
     localPos := pos.xy - BoardPos
 
     // Glow
-    SpreadL := Spread * 1.5 * (0.95 + 0.05 * sin(Time / 120))
-    SpreadR := Spread * 1.5 * (0.95 + 0.05 * sin(Time / 60))
+    SpreadL := Spread * 1.5 * (0.9 + 0.1 * sin(Time / 120))
+    SpreadR := Spread * 1.5 * (0.9 + 0.1 * sin(Time / 60))
 
-    distLeft := length(pos.xy) / SpreadL
-    distRight := length(vec2(canvas.x - pos.x, pos.y)) / SpreadR
+    uv := pos.xy / canvas
+    uv.y *= 1-VertSpread
 
-    glowL := GlowLeft * max(0.0, (1.0 - distLeft))
-    glowR := GlowRight * max(0.0, (1.0 - distRight))
+
+    distLeft := length(uv) / SpreadL
+    distRight := length(vec2(1.0, 0.0) - uv) / SpreadR
+
+    glowL := GlowLeft * exp(-distLeft * distLeft)
+    glowR := GlowRight * exp(-distRight * distRight)
 
     background := BaseColor + Intensity * (glowL + glowR)
 

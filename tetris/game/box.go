@@ -9,6 +9,7 @@ type Box struct {
 	Shader     *ebiten.Shader
 	Opts       *ebiten.DrawRectShaderOptions
 	X, Y, W, H int
+	Padding    int
 }
 
 func NewBox(shader *ebiten.Shader, col color.Color, thick, rad, dark float32) *Box {
@@ -21,7 +22,6 @@ func NewBox(shader *ebiten.Shader, col color.Color, thick, rad, dark float32) *B
 		Shader: shader,
 		Opts: &ebiten.DrawRectShaderOptions{
 			Uniforms: map[string]any{
-				"BoxSize":         [2]float32{1, 1},
 				"BoxDarken":       [4]float32{0, 0, 0, dark},
 				"CornerRadius":    rad,
 				"BorderThickness": thick,
@@ -38,10 +38,9 @@ func (b *Box) Draw(screen *ebiten.Image) {
 }
 
 func (b *Box) SetSize(width, height int) {
-	b.Opts.Uniforms["BoxSize"] = [2]float32{float32(width), float32(height)}
-	b.W, b.H = width, height
+	b.W, b.H = width+b.Padding*2, height+b.Padding*2
 }
 
 func (b *Box) SetPosition(x, y int) {
-	b.X, b.Y = x, y
+	b.X, b.Y = x-b.Padding, y-b.Padding
 }

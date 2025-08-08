@@ -81,6 +81,12 @@ func (g *Game) Init() {
 	// Controls
 	g.pool.Add(NewControls(gr))
 
+	// Grid box
+	grBox := NewBox(loader.GetShader("box"), color.White, 2, 10, 0.5)
+	grBox.Padding = 5
+	g.pool.Add(grBox)
+	layout.Grid.Attach(grBox)
+
 	// Grid view
 	grView := grid.NewView(
 		gr, 4, 32,

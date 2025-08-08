@@ -74,6 +74,10 @@ func (g *Game) Init() {
 	bg := NewBackground(loader.GetShader("background"))
 	g.pool.Add(bg)
 
+	// Background particles
+	particles := NewParticles(loader.GetShader("particles"))
+	g.pool.Add(particles)
+
 	// Main container
 	container := NewBox(loader.GetShader("box"), color.White, 2, 10, 0.5)
 	g.pool.Add(container)
@@ -87,7 +91,7 @@ func (g *Game) Init() {
 	g.pool.Add(NewControls(gr))
 
 	// Grid box
-	grBox := NewBox(loader.GetShader("box"), color.White, 2, 10, 0.5)
+	grBox := NewBox(loader.GetShader("box"), color.White, 2, 10, 0.6)
 	grBox.Padding = 5
 	g.pool.Add(grBox)
 	layout.Grid.Attach(grBox)

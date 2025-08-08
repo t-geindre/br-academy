@@ -25,14 +25,6 @@ func (b *Background) Update() {
 	b.Opts.Uniforms["Time"] = b.Time
 }
 
-func (b *Background) SetSize(width, height int) {
-	b.Opts.Uniforms["BoardSize"] = [2]float32{float32(width), float32(height)}
-}
-
-func (b *Background) SetPosition(x, y int) {
-	b.Opts.Uniforms["BoardPos"] = [2]float32{float32(x), float32(y)}
-}
-
 func (b *Background) setShader(shader *ebiten.Shader) {
 	b.Shader = shader
 	b.Opts = &ebiten.DrawRectShaderOptions{

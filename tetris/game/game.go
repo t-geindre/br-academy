@@ -106,6 +106,16 @@ func (g *Game) Init() {
 	g.pool.Add(grView)
 	layout.Grid.Attach(grView)
 
+	// Grid danger effect
+	g.pool.Add(pool.NewUpdater(func() {
+		v := float32(gr.Highest)
+		if v > 10 {
+			bg.SetDanger(v / 20)
+		} else {
+			bg.SetDanger(0)
+		}
+	}))
+
 	// Prepare font faces
 	titleFont := &text.GoTextFace{Source: loader.GetFont("bold"), Size: 40}
 	normalFont := &text.GoTextFace{Source: loader.GetFont("normal"), Size: 40}

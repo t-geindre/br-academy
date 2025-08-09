@@ -9,7 +9,7 @@ type Grid struct {
 	W, H   int
 	Bricks []*ebiten.DrawImageOptions // Nil is empty
 
-	// Todo there is no need for a next, Bag7[0] should be enought
+	// Todo there is no need for a next, Bag7[0] should be enough
 	Active, Next *FallingTetrimino
 	Tetriminos   [7]Tetrimino
 	Bag7         []Tetrimino
@@ -18,6 +18,8 @@ type Grid struct {
 	Stats *Stats
 
 	ToClear []int
+
+	Highest int // Highest brick
 }
 
 func NewGrid(w, h int) *Grid {
@@ -52,6 +54,7 @@ func (g *Grid) Update() {
 func (g *Grid) Reset() {
 	g.Active = nil
 	g.Next = nil
+	g.ToClear = nil
 
 	g.Bag7 = make([]Tetrimino, 0, 7)
 	g.Bricks = make([]*ebiten.DrawImageOptions, g.W*g.H)
@@ -59,6 +62,7 @@ func (g *Grid) Reset() {
 
 	g.Stats.Reset()
 	g.Ticks = g.Stats.GetTickRate()
+	g.Highest = 0
 }
 
 // TETRIMINO LOGIC
@@ -122,6 +126,7 @@ func (g *Grid) FixTetrimino() {
 		}
 	}
 
+	g.computeHighest()
 	g.SpawnTetrimino()
 
 	// Force grid ticks, re-sync grid with tetrimino spawn
@@ -234,6 +239,19 @@ func (g *Grid) ClearLines() {
 	}
 
 	g.ToClear = nil
+	g.computeHighest()
+}
+
+func (g *Grid) computeHighest() {
+	g.Highest = 0
+	for y := 0; y < g.H; y++ {
+		for x := 0; x < g.W; x++ {
+			v := g.H - y
+			if g.Bricks[y*g.W+x] != nil && v > g.Highest {
+				g.Highest = v
+			}
+		}
+	}
 }
 
 // CONTROLS

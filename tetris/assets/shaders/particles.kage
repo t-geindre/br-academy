@@ -34,6 +34,12 @@ func Fragment(pos vec4, localPos vec2, _col vec4) vec4 {
         partYAmp := h2 * 100
         partPos.y = partPos.y + sin((Time/partYSpeed)+partYPhase)*partYAmp
 
+        // Part x move
+        partXPhase := h2 * 100
+        partXSpeed := (h1+h3)/2 * 50 + 150
+        partXAmp := h1 * 100
+        partPos.x = partPos.x + sin((Time/partXSpeed)+partXPhase)*partXAmp
+
         // Scale, softness, alpha
         partSize := (h3+h2)/2 * 50 + 50
         partSoft := h1 * 20 + 30

@@ -20,26 +20,24 @@ func Fragment(pos vec4, localPos vec2, _col vec4) vec4 {
 
 	for i := 0; i < PARTICLE_COUNT; i++ {
         fi := float(i)
+        h1 := hash(fi * 1.28)
+        h2 := hash(fi * 4.56)
+        h3 := hash(fi * 7.89)
+
 
         // Init position
-        partPos := vec2(hash(fi*1.28), hash(fi*4.56)) * canvas
+        partPos := vec2(h1, h2) * canvas
 
         // Part y move
-        partYDir := hash(fi*5.67) * 2.0 - 1.0
-        partYSpeed := hash(fi*8.90) * 200 + 200
-        partYTime := hash(fi*11.12) * 100
-        partPos.y = partPos.y + sin((Time+partYTime)/partYSpeed) * partYDir * 100
-
-        // Part x move
-        partXDir := hash(fi*2.34) * 2.0 - 1.0
-        partXSpeed := hash(fi*3.45) * 200 + 200
-        partXTime := hash(fi*6.78) * 100
-        partPos.x = partPos.x + sin((Time+partXTime)/partXSpeed/2) * partXDir * 100
+        partYPhase := h3 * 200
+        partYSpeed := (h1+h2)/2 * 50 + 150
+        partYAmp := h2 * 100
+        partPos.y = partPos.y + sin((Time/partYSpeed)+partYPhase)*partYAmp
 
         // Scale, softness, alpha
-        partSize := hash(fi*7.89) * 50 + 50
-        partSoft := hash(fi*10.11) * 20 + 30
-        partAlpha := hash(fi*12.13) * .2 + .1
+        partSize := (h3+h2)/2 * 50 + 50
+        partSoft := h1 * 20 + 30
+        partAlpha := h3 * .3 + .1
 
         v := softCircle(localPos, partPos, partSize, partSoft) * partAlpha
 		col += vec4(v,v,v,v)

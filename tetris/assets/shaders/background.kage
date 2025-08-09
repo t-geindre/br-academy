@@ -11,15 +11,6 @@ var VertSpread float
 
 var Time float
 
-func noise(p vec2) float {
-    return 0.8 + 0.2 * sin((p.x + p.y) * 0.01 + Time * 0.01)
-}
-
-func roundRectDist(p, size vec2, radius float) float {
-    q := abs(p - size * 0.5) - size * 0.5 + vec2(radius, radius)
-    return length(max(q, vec2(0))) - radius
-}
-
 func Fragment(pos vec4) vec4 {
     // Glow
     SpreadL := Spread * 1.5 * (0.9 + 0.1 * sin(Time / 120))

@@ -1,15 +1,15 @@
 package debug
 
 import (
+	"engine/layout"
+	"engine/ui"
 	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"golang.org/x/image/colornames"
 	"image/color"
-	"layout"
 	"math/rand"
 	"time"
-	"ui"
 )
 
 func DrawLayoutNode(screen *ebiten.Image, n *layout.Node) {

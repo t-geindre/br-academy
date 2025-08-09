@@ -2,21 +2,21 @@ package game
 
 import (
 	"bytes"
-	"component"
-	"control"
-	"debug"
+	"engine/component"
+	"engine/control"
+	"engine/debug"
+	"engine/pool"
+	"engine/stream"
+	"engine/ui"
 	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/hajimehoshi/ebiten/v2/audio/mp3"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"image/color"
-	"pool"
-	"stream"
 	"tetris/assets"
 	"tetris/game/grid"
 	"time"
-	"ui"
 )
 
 const (

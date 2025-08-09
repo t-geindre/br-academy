@@ -1,11 +1,9 @@
 package stream
 
-/*
-
 import (
+	"engine/maths"
 	"github.com/fogleman/ease"
 	"io"
-	"maths"
 )
 
 type Pulser struct {
@@ -38,4 +36,3 @@ func (p *Pulser) Read(b []byte) (n int, err error) {
 func (p *Pulser) Seek(offset int64, whence int) (int64, error) {
 	return p.src.Seek(offset, whence)
 }
-*/

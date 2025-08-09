@@ -1,8 +1,8 @@
 package game
 
 import (
+	"engine/layout"
 	"github.com/hajimehoshi/ebiten/v2"
-	"layout"
 )
 
 type Layout struct {

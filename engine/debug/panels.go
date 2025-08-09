@@ -1,8 +1,8 @@
 package debug
 
 import (
+	"engine/ui"
 	"github.com/hajimehoshi/ebiten/v2"
-	"ui"
 )
 
 func DrawFTPS(img *ebiten.Image) {

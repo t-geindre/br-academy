@@ -1,6 +1,8 @@
 package main
 
 import (
+	"engine/debug"
+	"engine/ui"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
@@ -8,7 +10,6 @@ import (
 	"image"
 	"image/color"
 	"math"
-	"ui"
 )
 
 const (
@@ -263,7 +264,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 
 	ui.DrawPanel(screen, ui.TopRight, "[F1] Mode: %s", mode)
-	ui.DrawFTPS(screen)
+	debug.DrawFTPS(screen)
 }
 
 func (g *Game) Layout(w, h int) (int, int) {

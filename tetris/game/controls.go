@@ -1,7 +1,7 @@
 package game
 
 import (
-	"control"
+	"engine/control"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"tetris/game/grid"

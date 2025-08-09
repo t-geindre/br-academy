@@ -12,8 +12,8 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"image/color"
 	"pool"
+	"stream"
 	"tetris/assets"
-	gameaudio "tetris/audio"
 	"tetris/game/grid"
 	"time"
 	"ui"
@@ -184,12 +184,12 @@ func (g *Game) Init() {
 	g.state = StateRunning
 
 	// Fixme testing audio
-	stream, err := mp3.DecodeWithSampleRate(44100, bytes.NewReader(loader.GetRaw("audio-st")))
+	strm, err := mp3.DecodeWithSampleRate(44100, bytes.NewReader(loader.GetRaw("audio-st")))
 	if err != nil {
 		panic(err)
 	}
 
-	looper := gameaudio.NewLooper(44100, stream)
+	looper := stream.NewLooper(44100, strm)
 	oldTheme := looper.AddLoop(0, time.Millisecond*13714)
 	mainTheme := looper.AddLoop(time.Millisecond*41142, time.Millisecond*109714)
 	_, _ = oldTheme, mainTheme

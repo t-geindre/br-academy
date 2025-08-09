@@ -9,6 +9,7 @@ require (
 	github.com/hajimehoshi/ebiten/v2 v2.8.8
 	layout v0.0.0-00010101000000-000000000000
 	pool v0.0.0-00010101000000-000000000000
+	stream v0.0.0-00010101000000-000000000000
 	ui v0.0.0-00010101000000-000000000000
 )
 
@@ -32,5 +33,6 @@ replace (
 	debug => ../libs/debug
 	layout => ../libs/layout
 	pool => ../libs/pool
+	stream => ../libs/stream
 	ui => ../libs/ui
 )

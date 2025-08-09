@@ -42,9 +42,9 @@ func (b *Background) Update() {
 			b.dEase = b.danger
 		} else {
 			if delta < 0 {
-				b.dEase += 0.002
+				b.dEase += 0.003
 			} else {
-				b.dEase -= 0.002
+				b.dEase -= 0.003
 			}
 		}
 	}

@@ -109,8 +109,8 @@ func (g *Game) Init() {
 	// Grid danger effect
 	g.pool.Add(pool.NewUpdater(func() {
 		v := float32(gr.Highest)
-		if v > 10 {
-			bg.SetDanger(v / 20)
+		if v > 15 {
+			bg.SetDanger((v - 15) / 5)
 		} else {
 			bg.SetDanger(0)
 		}

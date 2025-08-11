@@ -58,7 +58,7 @@ func (b *Background) Update() {
 	}
 
 	b.Time++
-	b.Opts.Uniforms["Time"] = b.Time
+	b.Opts.Uniforms["time"] = b.Time
 	b.Opts.Uniforms["GlowLeft"] = glowLeft
 	b.Opts.Uniforms["GlowRight"] = glowRight
 }
@@ -71,7 +71,7 @@ func (b *Background) setShader(shader *ebiten.Shader) {
 			"Intensity":  float32(.9),
 			"Spread":     float32(.28),
 			"VertSpread": float32(.45),
-			"Time":       float32(0),
+			"time":       float32(0),
 		},
 	}
 }

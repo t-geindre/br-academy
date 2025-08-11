@@ -106,16 +106,6 @@ func (g *Game) Init() {
 	g.pool.Add(grView)
 	layout.Grid.Attach(grView)
 
-	// Grid danger effect
-	g.pool.Add(pool.NewUpdater(func() {
-		v := float32(gr.Highest)
-		if v > 15 {
-			bg.SetDanger((v - 15) / 5)
-		} else {
-			bg.SetDanger(0)
-		}
-	}))
-
 	// Prepare font faces
 	titleFont := &text.GoTextFace{Source: loader.GetFont("bold"), Size: 40}
 	normalFont := &text.GoTextFace{Source: loader.GetFont("normal"), Size: 40}
@@ -183,24 +173,52 @@ func (g *Game) Init() {
 	// Run the game
 	g.state = StateRunning
 
-	// Fixme testing audio
-	strm, err := mp3.DecodeWithSampleRate(44100, bytes.NewReader(loader.GetRaw("audio-st")))
+	// Audio
+	const SampleRate = 44100
+
+	rawStr, err := mp3.DecodeWithSampleRate(44100, bytes.NewReader(loader.GetRaw("audio-st")))
 	if err != nil {
 		panic(err)
 	}
 
-	looper := dsp.NewLooper(44100, strm)
-	oldTheme := looper.AddLoop(0, time.Millisecond*13714)
-	mainTheme := looper.AddLoop(time.Millisecond*41142, time.Millisecond*109714)
-	_, _ = oldTheme, mainTheme
-	looper.Play(mainTheme)
+	// Main theme time.Millisecond*41142, time.Millisecond*109714
+	// Old theme 0, time.Millisecond*13714
+	loopStream := dsp.NewLooper(44100, rawStr)
+	loopStream.Play(loopStream.AddLoop(time.Millisecond*41142, time.Millisecond*109714))
+
+	pulserStr := dsp.NewStreamPulser(
+		loopStream,
+		dsp.NewFilterBandPass(SampleRate, 50, 100),
+		0.20,                 // threshold
+		time.Millisecond*300, // release
+	)
 
 	ctx := audio.NewContext(44100)
-	player, err := ctx.NewPlayer(looper)
+	player, err := ctx.NewPlayer(pulserStr)
 	if err != nil {
 		panic(err)
 	}
 
 	player.SetVolume(1)
+	player.SetBufferSize(time.Millisecond * 20) // Small buffer for low latency sync
+	player.SetPosition(time.Second * 35)        // todo remove me
 	player.Play()
+
+	// Updates
+
+	// Grid danger effect
+	g.pool.Add(pool.NewUpdater(func() {
+		// Grid danger effect
+		v := float32(gr.Highest)
+		if v > 15 {
+			bg.SetDanger((v - 15) / 5)
+		} else {
+			bg.SetDanger(0)
+		}
+
+		// Pulser
+		if pulserStr.Gate() {
+			particles.Pulse()
+		}
+	}))
 }

@@ -4,6 +4,7 @@ package shaders
 const PARTICLE_COUNT = 48
 
 var Time float
+var Pulse float
 
 func hash(n float) float {
 	return fract(sin(n)*43758.5453123)
@@ -30,18 +31,18 @@ func Fragment(pos vec4, localPos vec2, _col vec4) vec4 {
 
         // Part y move
         partYPhase := h3 * 200
-        partYSpeed := (h1+h2)/2 * 50 + 150
+        partYSpeed := (h1+h2)/2 * 50 + 50
         partYAmp := h2 * 100
         partPos.y = partPos.y + sin((Time/partYSpeed)+partYPhase)*partYAmp
 
         // Part x move
         partXPhase := h2 * 100
-        partXSpeed := (h1+h3)/2 * 50 + 150
+        partXSpeed := (h1+h3)/2 * 50 + 50
         partXAmp := h1 * 100
         partPos.x = partPos.x + sin((Time/partXSpeed)+partXPhase)*partXAmp
 
         // Scale, softness, alpha
-        partSize := (h3+h2)/2 * 50 + 50
+        partSize := (h3+h2)/2 * 50 + 50 + Pulse * 5
         partSoft := h1 * 20 + 30
         partAlpha := h3 * .3 + .1
 

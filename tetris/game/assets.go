@@ -1,9 +1,11 @@
 package game
 
-import "tetris/assets"
+import (
+	"engine/asset"
+)
 
-func GetAssetsLoader() *assets.Loader {
-	loader := assets.NewLoader()
+func GetAssetsLoader() *asset.Loader {
+	loader := asset.NewLoader()
 
 	// Images
 	loader.AddImage("background", "assets/imgs/ui.png")

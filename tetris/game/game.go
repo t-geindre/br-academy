@@ -2,11 +2,12 @@ package game
 
 import (
 	"bytes"
+	"engine/asset"
 	"engine/component"
 	"engine/control"
 	"engine/debug"
+	"engine/dsp"
 	"engine/pool"
-	"engine/stream"
 	"engine/ui"
 	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -14,7 +15,6 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/audio/mp3"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"image/color"
-	"tetris/assets"
 	"tetris/game/grid"
 	"time"
 )
@@ -29,7 +29,7 @@ type Game struct {
 	pool  *pool.Pool
 }
 
-func NewGame(loader *assets.Loader) *Game {
+func NewGame(loader *asset.Loader) *Game {
 	g := &Game{
 		state: StateInit,
 		pool:  pool.NewPool(),
@@ -189,7 +189,7 @@ func (g *Game) Init() {
 		panic(err)
 	}
 
-	looper := stream.NewLooper(44100, strm)
+	looper := dsp.NewLooper(44100, strm)
 	oldTheme := looper.AddLoop(0, time.Millisecond*13714)
 	mainTheme := looper.AddLoop(time.Millisecond*41142, time.Millisecond*109714)
 	_, _ = oldTheme, mainTheme

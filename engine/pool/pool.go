@@ -22,12 +22,14 @@ func NewPool() *Pool {
 	}
 }
 
-func (p *Pool) Add(item any) {
-	if drawable, ok := item.(Drawable); ok {
-		p.drawables = append(p.drawables, drawable)
-	}
-	if updatable, ok := item.(Updatable); ok {
-		p.updatables = append(p.updatables, updatable)
+func (p *Pool) Add(items ...any) {
+	for _, item := range items {
+		if drawable, ok := item.(Drawable); ok {
+			p.drawables = append(p.drawables, drawable)
+		}
+		if updatable, ok := item.(Updatable); ok {
+			p.updatables = append(p.updatables, updatable)
+		}
 	}
 }
 

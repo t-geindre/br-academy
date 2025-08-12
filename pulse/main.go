@@ -9,9 +9,10 @@ import (
 func main() {
 	loader := asset.NewLoader()
 	loader.AddShader("pulse", "assets/pulse.kage")
-	loader.AddRaw("ost", "assets/st.mp3")
+	loader.AddRaw("ost", "assets/trance.mp3")
 	loader.MustLoad()
 
+	ebiten.SetWindowSize(300, 300)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 	ebiten.SetWindowTitle("Kick detector")
 

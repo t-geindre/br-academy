@@ -58,6 +58,13 @@ func (l *StreamLooper) Read(p []byte) (int, error) {
 	return n, nil
 }
 
+func (l *StreamLooper) Seek(offset int64, whence int) (int64, error) {
+	n, err := l.src.Seek(offset, whence)
+	l.cursor = n
+
+	return n, err
+}
+
 func (l *StreamLooper) AddLoop(start, end time.Duration) int {
 	// 2 bytes per sample, 2 channels
 	const bytePerFrame = 4

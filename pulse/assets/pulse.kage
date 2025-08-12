@@ -4,22 +4,38 @@ package game
 var Time float
 var Pulse float
 
-func Fragment(pos vec4, local vec2) vec4 {
-    pulseColor := vec4(1,0,.5,1)
-    normalColor := vec4(0,0,1,1)
+func cosPalette(t float, a, b, c, d vec3) vec3 {
+	return a + b * cos(6.2831853 * (c*t + d))
+}
 
+func palNeon(t float) vec3 {
+	return cosPalette(t, vec3(0.5), vec3(0.5), vec3(1), vec3(0.00, 0.33, 0.67))
+}
+
+func Fragment(pos vec4, local vec2) vec4 {
     // Normalize [0, 1]
     canvas := imageSrc0Size()
     uv := local / canvas
 
-    // Aspect ratio correction
-    d := uv - vec2(0.5, 0.5)   //center
-    d.x *= canvas.x / canvas.y // fix
+    // Background
+    bgColor := vec4(0, 0, 0, 1)
+    bgOverColor := vec4(palNeon(Time / 10.0 + Pulse/50), 1)
+    bgUv := vec2(uv.x +  + cos(Time / 3 + Pulse/50), uv.y + cos(Time / 6 + Pulse/50))
+    bgUv = fract(bgUv * 3.0)
+
+    bgColor = mix(bgOverColor, bgColor, length(vec2(.5,.5) - bgUv))
+
+
+    // Pulser ratio correction + center
+    d := uv - vec2(0.5, 0.5)
+    d.x *= canvas.x / canvas.y
 
     // Pulse effect
+    circColor := vec4(0,0,1,1)
+
     dist := length(d)
-    p := Pulse * 0.05 + 0.1
+    p := Pulse * 0.06 + 0.1
     v := 1.0 - smoothstep(p, p+0.03, dist)
 
-    return mix(normalColor, pulseColor, Pulse) * v
+    return mix(bgColor, circColor, v)
 }

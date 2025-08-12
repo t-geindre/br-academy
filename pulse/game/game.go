@@ -41,8 +41,9 @@ func (g *Game) init(loader *asset.Loader) {
 	g.pool = pool.NewPool()
 
 	// Filter/pulse configuration
-	threshold := 0.20
-	release := time.Millisecond * 300
+	threshold := 0.26
+	release := time.Millisecond * 400
+	band := [2]float64{50, 100}
 
 	const SampleRate = 44100
 
@@ -52,7 +53,7 @@ func (g *Game) init(loader *asset.Loader) {
 		panic(err)
 	}
 
-	filter := dsp.NewFilterBandPass(SampleRate, 50, 100)
+	filter := dsp.NewFilterBandPass(SampleRate, band[0], band[1])
 	stream := dsp.NewStreamPulser(rawStr, filter, threshold, release)
 
 	actx := audio.NewContext(SampleRate)
@@ -64,15 +65,18 @@ func (g *Game) init(loader *asset.Loader) {
 	// Player
 	player.SetBufferSize(time.Millisecond * 20)
 	player.SetVolume(1)
-	player.SetPosition(time.Second * 35)
 	player.Play()
 
-	// Pulse visualization
+	// pulse visualization
 	shd := NewShader(loader.GetShader("pulse"))
 	g.pool.Add(shd)
+
+	// Debug info
 	g.pool.Add(pool.NewDrawer(func(image *ebiten.Image) {
 		debug.DrawFTPS(image)
-		ui.DrawPanel(image, ui.TopRight, "Threshold: %.2f\nRelease: %s", threshold, release)
+		ui.DrawPanel(image, ui.TopRight, "Threshold: %.2f", threshold)
+		ui.DrawPanel(image, ui.BottomRight, "Release: %s", release)
+		ui.DrawPanel(image, ui.BottomLeft, "Band: %.0f-%.0f Hz", band[0], band[1])
 	}))
 
 	// Controls
@@ -104,9 +108,27 @@ func (g *Game) init(loader *asset.Loader) {
 			r.Stop()
 		}
 
+		// Player seek
+		p := time.Duration(0)
+		if ebiten.IsKeyPressed(ebiten.KeyPageUp) {
+			p += time.Millisecond * 100 * time.Duration(mult)
+		}
+		if ebiten.IsKeyPressed(ebiten.KeyPageDown) {
+			p -= time.Millisecond * 100 * time.Duration(mult)
+		}
+		if p != 0 {
+			player.SetPosition(p + player.Position())
+		}
+
 		// Apply changes to the stream
 		stream.SetRelease(release)
 		stream.SetThreshold(threshold)
+
+		// Simple loop
+		if !player.IsPlaying() {
+			player.SetPosition(0)
+			player.Play()
+		}
 
 		// Forward the gate state to the shader
 		if stream.Gate() {

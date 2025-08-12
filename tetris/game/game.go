@@ -219,6 +219,7 @@ func (g *Game) Init() {
 		// Pulser
 		if pulserStr.Gate() {
 			particles.Pulse()
+			bg.Pulse()
 		}
 	}))
 }

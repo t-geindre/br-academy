@@ -9,6 +9,8 @@ var Intensity float
 var Spread float
 var VertSpread float
 
+var Pulse float
+
 var Time float
 
 func Fragment(pos vec4) vec4 {

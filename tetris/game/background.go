@@ -1,7 +1,10 @@
 package game
 
 import (
+	"engine/math"
+	"github.com/fogleman/ease"
 	"github.com/hajimehoshi/ebiten/v2"
+	"time"
 )
 
 type Background struct {
@@ -16,6 +19,8 @@ type Background struct {
 
 	danger float32 // 0.0 - 1.0
 	dEase  float32 // 0.0 - 1.0
+
+	pulse *math.PingPong
 }
 
 func NewBackground(shader *ebiten.Shader) *Background {
@@ -23,6 +28,10 @@ func NewBackground(shader *ebiten.Shader) *Background {
 		glowLeft:   [4]float32{00.098, 0.623, 0.863, 1.0}, // #199FDC
 		glowRight:  [4]float32{0.510, 0.176, 0.592, 1.0},  // #822D97
 		glowDanger: [4]float32{1, 0, 0, 1.0},              // RED
+		pulse: math.NewPingPong(
+			ease.InSine, ease.OutSine,
+			time.Millisecond*100, time.Millisecond*300,
+		),
 	}
 	b.setShader(shader)
 	return b
@@ -61,6 +70,7 @@ func (b *Background) Update() {
 	b.Opts.Uniforms["time"] = b.Time
 	b.Opts.Uniforms["GlowLeft"] = glowLeft
 	b.Opts.Uniforms["GlowRight"] = glowRight
+	b.Opts.Uniforms["Pulse"] = b.pulse.Value()
 }
 
 func (b *Background) setShader(shader *ebiten.Shader) {
@@ -78,4 +88,8 @@ func (b *Background) setShader(shader *ebiten.Shader) {
 
 func (b *Background) SetDanger(danger float32) {
 	b.danger = danger
+}
+
+func (b *Background) Pulse() {
+	b.pulse.Start()
 }

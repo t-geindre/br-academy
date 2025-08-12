@@ -25,7 +25,7 @@ func NewShader(shader *ebiten.Shader) *Shader {
 		},
 		pulse: math.NewPingPong(
 			ease.Linear, ease.Linear,
-			time.Millisecond*50, time.Millisecond*150,
+			time.Millisecond*50, time.Millisecond*350,
 		),
 		start: time.Now(),
 	}

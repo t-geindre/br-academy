@@ -94,7 +94,7 @@ func (l *Loader) GetImage(name string) *ebiten.Image {
 func (l *Loader) GetShader(name string) *ebiten.Shader {
 	shd, ok := l.Shaders[name]
 	if !ok {
-		panic("Shader not found: " + name)
+		panic("shader not found: " + name)
 	}
 
 	return shd

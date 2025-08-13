@@ -12,30 +12,47 @@ func palNeon(t float) vec3 {
 	return cosPalette(t, vec3(0.5), vec3(0.5), vec3(1), vec3(0.00, 0.33, 0.67))
 }
 
+func sinRange(t float, a, b float) float {
+    return a + (b - a) * (sin(t) + 1) / 2
+}
+
 func Fragment(pos vec4, local vec2) vec4 {
     // Normalize [0, 1]
     canvas := imageSrc0Size()
     uv := local / canvas
 
     // Scroll
-    uv.x += sin(Time/2)
-    uv.y += cos(Time/3)
+    uv.x += sin(Time/4)
+    uv.y += cos(Time/6)
+
+    // Color
+    circColor := vec4(palNeon(
+        uv.x / 5 * sin(Time/10) + uv.y / 5 * sin(Time/8),
+    ), 1)
 
     // Pulser ratio correction + center
     d := uv - vec2(0.5, 0.5)
     d.x *= canvas.x / canvas.y
 
-    // Repeat pattern
-    d = fract(d * 2) - vec2(0.5, 0.5)
+    // Repeat pattern + zom sin
+    d = fract(d * 5 * sinRange(Time/2, .5, 1)) - vec2(0.5, 0.5)
 
-    // Pulse effect
-    circColor := vec4(palNeon(
-        uv.x / 2 * sin(Time/5) + uv.y / 2 * sin(Time/2),
-    ), 1)
-    p := Pulse * 0.16 + 0.3
-
+    // Fract dist (repeat circles)
     dist := length(d)
-    v := 1.0 - smoothstep(p, p+0.03, dist)
+    dist = fract(dist * 8*sinRange(Time, .5, 1))
 
-    return mix(vec4(0), circColor, v)
+    circColor = vec4(palNeon(
+        d.x * sin(Time/10) + d.y * sin(Time/8),
+    ), 1)
+
+    // Radius variation
+    p := Pulse * .4 // Pulse variation
+    s := (sin(Time)+1)/2*.5 // Sinusoidal variation
+    r := .1 + p + s // Final Radius
+
+    // Circle
+    thick, aa := .1, .01
+    ring := smoothstep(r - thick - aa, r - thick + aa, dist) - smoothstep(r + thick - aa, r + thick + aa, dist)
+
+    return mix(vec4(0), circColor, ring)
 }

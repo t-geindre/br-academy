@@ -65,6 +65,7 @@ func (g *Game) init(loader *asset.Loader) {
 	// Player
 	player.SetBufferSize(time.Millisecond * 20)
 	player.SetVolume(1)
+	//player.SetPosition(time.Second * 40)
 	player.Play()
 
 	// pulse visualization
@@ -90,6 +91,9 @@ func (g *Game) init(loader *asset.Loader) {
 	for _, r := range bindings {
 		g.pool.Add(r)
 	}
+
+	// Fullscreen toggle
+	g.pool.Add(control.NewFsToggle())
 
 	// Global updater
 	g.pool.Add(pool.NewUpdater(func() {

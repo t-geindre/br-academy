@@ -17,25 +17,25 @@ func Fragment(pos vec4, local vec2) vec4 {
     canvas := imageSrc0Size()
     uv := local / canvas
 
-    // Background
-    bgColor := vec4(0, 0, 0, 1)
-    bgOverColor := vec4(palNeon(Time / 10.0 + Pulse/50), 1)
-    bgUv := vec2(uv.x +  + cos(Time / 3 + Pulse/50), uv.y + cos(Time / 6 + Pulse/50))
-    bgUv = fract(bgUv * 3.0)
-
-    bgColor = mix(bgOverColor, bgColor, length(vec2(.5,.5) - bgUv))
-
+    // Scroll
+    uv.x += sin(Time/2)
+    uv.y += cos(Time/3)
 
     // Pulser ratio correction + center
     d := uv - vec2(0.5, 0.5)
     d.x *= canvas.x / canvas.y
 
+    // Repeat pattern
+    d = fract(d * 2) - vec2(0.5, 0.5)
+
     // Pulse effect
-    circColor := vec4(0,0,1,1)
+    circColor := vec4(palNeon(
+        uv.x / 2 * sin(Time/5) + uv.y / 2 * sin(Time/2),
+    ), 1)
+    p := Pulse * 0.16 + 0.3
 
     dist := length(d)
-    p := Pulse * 0.06 + 0.1
     v := 1.0 - smoothstep(p, p+0.03, dist)
 
-    return mix(bgColor, circColor, v)
+    return mix(vec4(0), circColor, v)
 }

@@ -73,12 +73,16 @@ func (g *Game) init(loader *asset.Loader) {
 	g.pool.Add(shd)
 
 	// Debug info
+	debugToggle := control.NewToggle(ebiten.KeyF1)
 	g.pool.Add(pool.NewDrawer(func(image *ebiten.Image) {
+		if !debugToggle.IsOn() {
+			return
+		}
 		debug.DrawFTPS(image)
 		ui.DrawPanel(image, ui.TopRight, "Threshold: %.2f", threshold)
 		ui.DrawPanel(image, ui.BottomRight, "Release: %s", release)
 		ui.DrawPanel(image, ui.BottomLeft, "Band: %.0f-%.0f Hz", band[0], band[1])
-	}))
+	}), debugToggle)
 
 	// Controls
 	mult, das, arr := 1.0, time.Millisecond*500, time.Millisecond*60

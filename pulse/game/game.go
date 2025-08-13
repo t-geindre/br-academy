@@ -18,9 +18,9 @@ type Game struct {
 	pool *pool.Pool
 }
 
-func NewGame(loader *asset.Loader) *Game {
+func NewGame(loader *asset.Loader, settings *Settings) *Game {
 	g := &Game{}
-	g.init(loader)
+	g.init(loader, settings)
 	return g
 }
 
@@ -37,14 +37,10 @@ func (g *Game) Layout(w, h int) (int, int) {
 	return w, h
 }
 
-func (g *Game) init(loader *asset.Loader) {
+func (g *Game) init(loader *asset.Loader, settings *Settings) {
 	g.pool = pool.NewPool()
 
 	// Filter/pulse configuration
-	threshold := 0.26
-	release := time.Millisecond * 400
-	band := [2]float64{50, 100}
-
 	const SampleRate = 44100
 
 	// Stream
@@ -53,8 +49,8 @@ func (g *Game) init(loader *asset.Loader) {
 		panic(err)
 	}
 
-	filter := dsp.NewFilterBandPass(SampleRate, band[0], band[1])
-	stream := dsp.NewStreamPulser(rawStr, filter, threshold, release)
+	filter := dsp.NewFilterBandPass(SampleRate, settings.Band[0], settings.Band[1])
+	stream := dsp.NewStreamPulser(rawStr, filter, settings.Threshold, settings.Release)
 
 	actx := audio.NewContext(SampleRate)
 	player, err := actx.NewPlayer(stream)
@@ -79,18 +75,18 @@ func (g *Game) init(loader *asset.Loader) {
 			return
 		}
 		debug.DrawFTPS(image)
-		ui.DrawPanel(image, ui.TopRight, "Threshold: %.2f", threshold)
-		ui.DrawPanel(image, ui.BottomRight, "Release: %s", release)
-		ui.DrawPanel(image, ui.BottomLeft, "Band: %.0f-%.0f Hz", band[0], band[1])
+		ui.DrawPanel(image, ui.TopRight, "Threshold: %.2f", settings.Threshold)
+		ui.DrawPanel(image, ui.BottomRight, "Release: %s", settings.Threshold)
+		ui.DrawPanel(image, ui.BottomLeft, "Band: %.0f-%.0f Hz", settings.Band[0])
 	}), debugToggle)
 
 	// Controls
 	mult, das, arr := 1.0, time.Millisecond*500, time.Millisecond*60
 	bindings := map[ebiten.Key]*control.Repeater{
-		ebiten.KeyArrowUp:    control.NewRepeater(das, arr, func() { threshold += 0.01 * mult }),
-		ebiten.KeyArrowDown:  control.NewRepeater(das, arr, func() { threshold -= 0.01 * mult }),
-		ebiten.KeyArrowRight: control.NewRepeater(das, arr, func() { release += time.Millisecond * time.Duration(mult) }),
-		ebiten.KeyArrowLeft:  control.NewRepeater(das, arr, func() { release -= time.Millisecond * time.Duration(mult) }),
+		ebiten.KeyArrowUp:    control.NewRepeater(das, arr, func() { settings.Threshold += 0.01 * mult }),
+		ebiten.KeyArrowDown:  control.NewRepeater(das, arr, func() { settings.Threshold -= 0.01 * mult }),
+		ebiten.KeyArrowRight: control.NewRepeater(das, arr, func() { settings.Release += time.Millisecond * time.Duration(mult) }),
+		ebiten.KeyArrowLeft:  control.NewRepeater(das, arr, func() { settings.Release -= time.Millisecond * time.Duration(mult) }),
 	}
 	for _, r := range bindings {
 		g.pool.Add(r)
@@ -129,8 +125,8 @@ func (g *Game) init(loader *asset.Loader) {
 		}
 
 		// Apply changes to the stream
-		stream.SetRelease(release)
-		stream.SetThreshold(threshold)
+		stream.SetRelease(settings.Release)
+		stream.SetThreshold(settings.Threshold)
 
 		// Simple loop
 		if !player.IsPlaying() {
@@ -142,5 +138,10 @@ func (g *Game) init(loader *asset.Loader) {
 		if stream.Gate() {
 			shd.Pulse()
 		}
+
+		// Watch window size
+		ww, wh := ebiten.WindowSize()
+		settings.WinSize[0] = ww
+		settings.WinSize[1] = wh
 	}))
 }

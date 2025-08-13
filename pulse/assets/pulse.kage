@@ -16,6 +16,19 @@ func sinRange(t float, a, b float) float {
     return a + (b - a) * (sin(t) + 1) / 2
 }
 
+func radialWarp(uv vec2, k float, ar float) vec2 {
+    p := uv - vec2(0.5)
+    p.x *= ar
+
+    r := length(p)
+    s := sin(min(1.0, r) * 1.5707963) // ~PI/2
+
+    p *= (1.0 + k * s)
+    p.x /= ar
+
+    return clamp(p + vec2(0.5), vec2(0), vec2(1))
+}
+
 func Fragment(pos vec4, local vec2) vec4 {
     // Pre calculate sins
     sin10 := sin(Time/10)
@@ -24,10 +37,14 @@ func Fragment(pos vec4, local vec2) vec4 {
     // Background
     background := vec4(0)
 
-
     // Normalize [0, 1]
     canvas := imageSrc0Size()
+    ar := canvas.x / canvas.y
     uv := local / canvas
+
+    // 3D Distortion
+    // uv *= sin(uv.x)
+    uv = radialWarp(uv, sinRange(Time+Pulse/2, -.7,-.5), ar)
 
     // Scroll
     uv.x += sin(Time/4)
@@ -35,10 +52,10 @@ func Fragment(pos vec4, local vec2) vec4 {
 
     // Pulser ratio correction + center
     d := uv - vec2(0.5, 0.5)
-    d.x *= canvas.x / canvas.y
+    d.x *= ar
 
     // Repeat pattern + zoom sin
-    d = fract(d * 5 * sinRange(Time/2, .5, 1)) - vec2(0.5, 0.5)
+    d = fract(d * 10 * sinRange(Time/2, .5, 1)) - vec2(0.5, 0.5)
 
     // Fract dist (repeat circles)
     dist := length(d)
@@ -47,7 +64,7 @@ func Fragment(pos vec4, local vec2) vec4 {
     // Circle color
     circColor := vec4(palNeon(
         // uv.x / 10 * sin8 + d.x / 5 * sin10 + d.y / 5 * sin10 + uv.x/10 * sin8,
-        (uv.x / 10 + d.x / 5) * sin10 + (uv.y /10 + d.y / 5) * sin8,
+        (uv.x / 10 + d.x / 5) * sin10 * 2 + (uv.y /10 + d.y / 5) * sin8 * 2,
     ), 1)
 
     // Radius variation

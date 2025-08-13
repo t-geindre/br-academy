@@ -8,9 +8,11 @@ import (
 	"engine/dsp"
 	"engine/pool"
 	"engine/ui"
+	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/hajimehoshi/ebiten/v2/audio/mp3"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"time"
 )
 
@@ -61,12 +63,53 @@ func (g *Game) init(loader *asset.Loader, settings *Settings) {
 	// Player
 	player.SetBufferSize(time.Millisecond * 20)
 	player.SetVolume(1)
-	//player.SetPosition(time.Second * 40)
 	player.Play()
 
 	// pulse visualization
 	shd := NewShader(loader.GetShader("pulse"))
 	g.pool.Add(shd)
+
+	// Parameters
+	multiplier := 1.0
+	parameters := NewParameters(
+		Param(
+			func() string { return fmt.Sprintf("Threshold: %.2f", settings.Threshold) },
+			func() { settings.Threshold += 0.01 * multiplier },
+			func() { settings.Threshold -= 0.01 * multiplier },
+		),
+		Param(
+			func() string { return fmt.Sprintf("Release: %s", settings.Release) },
+			func() { settings.Release += time.Millisecond * time.Duration(multiplier) },
+			func() { settings.Release -= time.Millisecond * time.Duration(multiplier) },
+		),
+		Param(
+			func() string { return fmt.Sprintf("Band left: %.0f Hz", settings.Band[0]) },
+			func() { settings.Band[0] += 1 * float64(multiplier) },
+			func() { settings.Band[0] -= 1 * float64(multiplier) },
+		),
+		Param(
+			func() string { return fmt.Sprintf("Band right: %.0f Hz", settings.Band[1]) },
+			func() { settings.Band[1] += 1 * float64(multiplier) },
+			func() { settings.Band[1] -= 1 * float64(multiplier) },
+		),
+	)
+
+	// Controls for parameters
+	das, arr := time.Millisecond*500, time.Millisecond*60
+	repeaters := map[ebiten.Key]*control.Repeater{
+		ebiten.KeyArrowUp: control.NewRepeater(das, arr, func() {
+			parameters.Add()
+		}),
+		ebiten.KeyArrowDown: control.NewRepeater(das, arr, func() {
+			parameters.Sub()
+		}),
+	}
+	for _, r := range repeaters {
+		g.pool.Add(r)
+	}
+
+	// Fullscreen toggle
+	g.pool.Add(control.NewFsToggle())
 
 	// Debug info
 	debugToggle := control.NewToggle(ebiten.KeyF1)
@@ -75,36 +118,19 @@ func (g *Game) init(loader *asset.Loader, settings *Settings) {
 			return
 		}
 		debug.DrawFTPS(image)
-		ui.DrawPanel(image, ui.TopRight, "Threshold: %.2f", settings.Threshold)
-		ui.DrawPanel(image, ui.BottomRight, "Release: %s", settings.Threshold)
-		ui.DrawPanel(image, ui.BottomLeft, "Band: %.0f-%.0f Hz", settings.Band[0])
+		ui.DrawPanel(image, ui.TopRight, parameters.Display())
 	}), debugToggle)
-
-	// Controls
-	mult, das, arr := 1.0, time.Millisecond*500, time.Millisecond*60
-	bindings := map[ebiten.Key]*control.Repeater{
-		ebiten.KeyArrowUp:    control.NewRepeater(das, arr, func() { settings.Threshold += 0.01 * mult }),
-		ebiten.KeyArrowDown:  control.NewRepeater(das, arr, func() { settings.Threshold -= 0.01 * mult }),
-		ebiten.KeyArrowRight: control.NewRepeater(das, arr, func() { settings.Release += time.Millisecond * time.Duration(mult) }),
-		ebiten.KeyArrowLeft:  control.NewRepeater(das, arr, func() { settings.Release -= time.Millisecond * time.Duration(mult) }),
-	}
-	for _, r := range bindings {
-		g.pool.Add(r)
-	}
-
-	// Fullscreen toggle
-	g.pool.Add(control.NewFsToggle())
 
 	// Global updater
 	g.pool.Add(pool.NewUpdater(func() {
 		// Control multiplier
-		mult = 1.0
+		multiplier = 1.0
 		if ebiten.IsKeyPressed(ebiten.KeyShift) {
-			mult = 10.0
+			multiplier = 10.0
 		}
 
 		// Update repeaters
-		for k, r := range bindings {
+		for k, r := range repeaters {
 			if ebiten.IsKeyPressed(k) {
 				r.Start()
 				continue
@@ -112,16 +138,12 @@ func (g *Game) init(loader *asset.Loader, settings *Settings) {
 			r.Stop()
 		}
 
-		// Player seek
-		p := time.Duration(0)
-		if ebiten.IsKeyPressed(ebiten.KeyPageUp) {
-			p += time.Millisecond * 100 * time.Duration(mult)
+		// Update parameters
+		if inpututil.IsKeyJustPressed(ebiten.KeyArrowLeft) {
+			parameters.Prev()
 		}
-		if ebiten.IsKeyPressed(ebiten.KeyPageDown) {
-			p -= time.Millisecond * 100 * time.Duration(mult)
-		}
-		if p != 0 {
-			player.SetPosition(p + player.Position())
+		if inpututil.IsKeyJustPressed(ebiten.KeyArrowRight) {
+			parameters.Next()
 		}
 
 		// Apply changes to the stream

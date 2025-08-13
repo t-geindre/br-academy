@@ -117,3 +117,12 @@ func (l *Loader) GetRaw(name string) []byte {
 
 	return raw
 }
+
+func (l *Loader) GetPath(name string) string {
+	for _, item := range l.ToLoad {
+		if item.Name == name {
+			return item.Path
+		}
+	}
+	panic("Path not found for asset: " + name)
+}

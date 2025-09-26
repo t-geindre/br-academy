@@ -78,7 +78,7 @@ func (g *Game) init(loader *asset.Loader, settings *Settings) {
 			func() { settings.Threshold -= 0.01 * multiplier },
 		),
 		Param(
-			func() string { return fmt.Sprintf("Release: %s", settings.Release) },
+			func() string { return fmt.Sprintf("release: %s", settings.Release) },
 			func() { settings.Release += time.Millisecond * time.Duration(multiplier) },
 			func() { settings.Release -= time.Millisecond * time.Duration(multiplier) },
 		),

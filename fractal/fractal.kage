@@ -1,0 +1,58 @@
+package shader
+//kage:unit pixels
+
+var Time float
+
+// SoftCircle draws a soft circle in the center of the canvas
+// uv: normalized coordinates (0,0) to (1,1)
+// r: radius of the circle
+// t: thickness of the ring
+// s: smoothness of the edge
+func SoftCircle(uv vec2, r, t, s float) float {
+    d := length(uv) // distance to center, equivalent to dist(uv, vec2(0, 0))
+    sd := abs(d - r) - (t * 0.5) // signed distance to the ring
+    return 1.0 - smoothstep(0.0, s, sd) // inverse + edge smoothness
+}
+
+// SinRange returns a value in the range [min, max] based on a sine function
+func SinRange(min, max, t float) float {
+     return min + (max - min) * 0.5 * (1.0 + sin(t))
+}
+
+// cosPalette returns a color based on a cosine function with parameters a, b, c, d
+func cosPalette(t float, a, b, c, d vec3) vec3 {
+	return a + b * cos(6.2831853 * (c*t + d))
+}
+
+// palNeon returns a neon color palette based on the input time t
+func palNeon(t float) vec3 {
+	return cosPalette(t, vec3(0.5), vec3(0.5), vec3(1), vec3(0.00, 0.33, 0.67))
+}
+
+
+func Fragment(pos vec4, local vec2) vec4 {
+    // canvas parameters
+    canvas := imageSrc0Size() // draw canvas
+    ar := canvas.x / canvas.y // aspect ratio
+
+    // Normalized coordinates
+    uv := local / canvas // normalized pos 0-1
+    uv -= vec2(0.5, 0.5) // center (0,0)
+    uv.x *= ar // fix ratio
+
+    col := vec3(0.0) // initialize color
+    for i := 0; i < 6; i++ {
+        fi := float(i) // current iteration
+
+        radius := SinRange(0.1, 0.4, Time + fi * 20) // radius based on time
+        v  := SoftCircle(uv, radius, 0.02, 0.05) // draw a soft circle
+
+        col += palNeon(fi/2*SinRange(.1,.5,Time*2))* v // palette
+
+        uv = fract(uv * 1.5) // repeat
+        uv -= vec2(0.5, 0.5) // center (0,0)
+    }
+
+
+    return vec4(col, 1)
+}

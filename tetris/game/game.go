@@ -184,7 +184,7 @@ func (g *Game) Init() {
 	// Main theme time.Millisecond*41142, time.Millisecond*109714
 	// Old theme 0, time.Millisecond*13714
 	loopStream := dsp.NewLooper(44100, rawStr)
-	loopStream.Play(loopStream.AddLoop(time.Millisecond*41142, time.Millisecond*109714))
+	loopStream.Play(loopStream.AddLoop(time.Millisecond*63437, time.Millisecond*123428))
 
 	pulserStr := dsp.NewStreamPulser(
 		loopStream,
@@ -201,7 +201,6 @@ func (g *Game) Init() {
 
 	player.SetVolume(1)
 	player.SetBufferSize(time.Millisecond * 20) // Small buffer for low latency sync
-	player.SetPosition(time.Second * 35)        // todo remove me
 	player.Play()
 
 	// Updates
